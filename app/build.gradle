@@ -45,7 +45,7 @@ android {
 
     }
 
-        testBuildType "debug"
+       testBuildType "debug"
     androidComponents {
         onVariants(selector().all()) {
             it.manifestPlaceholders.put("android:exported", "true")

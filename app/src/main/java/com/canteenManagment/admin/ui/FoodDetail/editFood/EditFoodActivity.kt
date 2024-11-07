@@ -15,7 +15,7 @@ import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity.Compan
 import com.canteenManagment.admin.R
 import com.canteenManagment.admin.databinding.ActivityEditFoodBinding
 import com.canteenManagment.admin.helper.CustomProgressBar
-import com.canteenManagment.admin.helper.DeleteCustomDiolog
+import com.canteenManagment.admin.helper.DeleteCustomDialog
 import com.canteenManagment.admin.helper.showShortToast
 import com.canteenManagment.admin.ui.FoodDetail.addFood.CustomeSpinnerAdapter
 import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity
@@ -29,7 +29,7 @@ class EditFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickL
     private lateinit var binding: ActivityEditFoodBinding
     private val mContext: Context = this
     private val progressDialog: CustomProgressBar = CustomProgressBar(this)
-    private val deleteDialog: DeleteCustomDiolog = DeleteCustomDiolog(this)
+    private val deleteDialog: DeleteCustomDialog = DeleteCustomDialog(this)
     private var imageUri: Uri? = null
     private lateinit var food: Food
 
@@ -199,7 +199,7 @@ class EditFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickL
     private fun deleteFood(){
         scope.launch {
             FirebaseApiManager.deleteFoodData(food).let {
-                deleteDialog.stopDiaolog()
+                deleteDialog.stopDialog()
                 when (it.isSuccess) {
                     true -> {
                         showShortToast(it.message, mContext)

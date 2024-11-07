@@ -3,42 +3,39 @@ package com.canteenManagment.admin.helper
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
-import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import com.canteenManagment.admin.R
-import kotlinx.android.synthetic.main.progress_bar.view.*
-import androidx.core.graphics.*
-import kotlinx.android.synthetic.main.delete_custome_diolog.view.*
-import androidx.core.graphics.drawable.toDrawable as toDrawable
+import com.canteenManagment.admin.databinding.DeleteCustomeDiologBinding // Ensure the generated binding import is correct
 
-class DeleteCustomDiolog(val activity : Activity) {
+class DeleteCustomDialog(private val activity: Activity) {
 
-    lateinit var alertDialog : Dialog
+    private lateinit var alertDialog: Dialog
+    private lateinit var binding: DeleteCustomeDiologBinding
 
-    fun startDialog(deleteFood : () -> Unit){
+    fun startDialog(deleteFood: () -> Unit) {
+        // Inflate the layout with ViewBinding
+        binding = DeleteCustomeDiologBinding.inflate(LayoutInflater.from(activity))
 
-        var dialog = AlertDialog.Builder(activity)
+        // Initialize AlertDialog builder
+        val dialogBuilder = AlertDialog.Builder(activity)
 
-        var view = LayoutInflater.from(activity).inflate(R.layout.delete_custome_diolog,null)
-
-        view.BT_cancel.setOnClickListener {
+        // Set up button click listeners with ViewBinding
+        binding.BTCancel.setOnClickListener {
             alertDialog.dismiss()
         }
-        view.BT_delete.setOnClickListener {
+        binding.BTDelete.setOnClickListener {
             deleteFood()
         }
 
-        dialog.setView(view)
+        dialogBuilder.setView(binding.root)
 
-        alertDialog = dialog.create()
+        alertDialog = dialogBuilder.create()
         alertDialog.show()
         alertDialog.setCancelable(true)
-        alertDialog.getWindow()?.setBackgroundDrawableResource(android.R.color.transparent)
-
+        alertDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
-    fun stopDiaolog(){
+
+    fun stopDialog() {
         alertDialog.dismiss()
     }
 }
