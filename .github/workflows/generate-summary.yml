@@ -38,9 +38,8 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add user_summary.txt
-        git commit -m "Update user_summary.txt"
+        git add admin_summary.txt
+        git commit -m "Update admin_summary.txt"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
