@@ -1,4 +1,3 @@
-
 import os
 
 # Define paths
@@ -7,7 +6,7 @@ APP_DIR = "app"
 APP_EXCLUDE_DIR = "app/build"
 LIBRARY_DIR = "canteen_managment_library"
 LIBRARY_EXCLUDE_DIR = "canteen_managment_library/build"
-SUMMARY_FILE = "user_summary.txt"
+SUMMARY_FILE = "admin_summary.txt"
 
 def should_include_file(file_path):
     # Exclude files in the app/build and canteen_managment_library/build directories
@@ -38,7 +37,7 @@ def get_files_to_include():
     return files_to_include
 
 def write_summary_file(files_to_include):
-    # Write content to user_summary.txt
+    # Write content to admin_summary.txt
     with open(SUMMARY_FILE, 'w') as summary:
         for file_path in files_to_include:
             summary.write(f"File: {file_path}\n")
