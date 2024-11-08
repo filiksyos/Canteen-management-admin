@@ -1,1 +1,4251 @@
+File: build.gradle
+----------------------------------------
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext.kotlin_version = '1.9.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.5.0-beta02'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.gms:google-services:4.3.14'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+========================================
+
+File: app/.gitignore
+----------------------------------------
+/build
+========================================
+
+File: app/proguard-rules.pro
+----------------------------------------
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
+
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
+
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
+========================================
+
+File: app/src/test/java/com/canteenManagment/admin/ExampleUnitTest.kt
+----------------------------------------
+package com.canteenManagment.admin
+
+import org.junit.Test
+
+import org.junit.Assert.*
+
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+class ExampleUnitTest {
+    @Test
+    fun addition_isCorrect() {
+        assertEquals(4, 2 + 2)
+    }
+}
+========================================
+
+File: app/src/androidTest/java/com/canteenManagment/admin/ExampleInstrumentedTest.kt
+----------------------------------------
+package com.canteenManagment.admin
+
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import org.junit.Assert.*
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+@RunWith(AndroidJUnit4::class)
+class ExampleInstrumentedTest {
+    @Test
+    fun useAppContext() {
+        // Context of the app under test.
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals("com.canteenManagment.admin", appContext.packageName)
+    }
+}
+========================================
+
+File: app/src/main/ic_launcher-playstore.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/AndroidManifest.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA"
+        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".ui.ScanActivity"></activity>
+        <activity android:name=".ui.FoodDetail.editFood.EditFoodActivity" />
+        <activity android:name=".ui.FoodDetail.addFood.AddFoodActivity" />
+        <activity android:name=".ui.FoodDetail.listFood.FoodListActivity" />
+        <activity android:name=".HomeActivity"
+            android:exported="true"
+            tools:ignore="IntentFilterExportedReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+========================================
+
+File: app/src/main/ic_error_image-playstore.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/HomeActivity.kt
+----------------------------------------
+package com.canteenManagment.admin
+
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import androidx.databinding.DataBindingUtil
+import com.canteenManagment.admin.BaseActivity.BaseActivity
+import com.canteenManagment.admin.ui.Fragments.Home.HomeFragment
+import com.canteenManagment.admin.ui.Fragments.MenuFragment
+import com.canteenManagment.admin.databinding.ActivityHomeBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
+
+class HomeActivity : BaseActivity() {
+
+    private lateinit var binding: ActivityHomeBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
+        setContentView(binding.root)
+
+        // Load the default fragment
+        openFragment(HomeFragment())
+        binding.bottomNavigationView.selectedItemId = R.id.home
+
+        // Set up navigation listener
+        binding.bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.home -> openFragment(HomeFragment())
+                R.id.menu -> openFragment(MenuFragment())
+                // R.id.profile -> openFragment(ProfileFragment())
+                else -> false
+            }
+            true
+        }
+    }
+
+    private fun openFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).commit()
+    }
+}
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/ScanActivity.kt
+----------------------------------------
+package com.canteenManagment.admin.ui
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.databinding.DataBindingUtil
+import com.canteenManagment.admin.BaseActivity.BaseActivity
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ActivityScanBinding
+import com.canteenManagment.admin.helper.CustomProgressBar
+import com.canteenManagment.admin.helper.showShortToast
+import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
+import com.journeyapps.barcodescanner.BarcodeCallback
+import com.journeyapps.barcodescanner.BarcodeResult
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import kotlinx.coroutines.launch
+
+class ScanActivity : BaseActivity() {
+
+    private lateinit var binding: ActivityScanBinding
+    private lateinit var barcodeView: DecoratedBarcodeView
+    private lateinit var progressDialog: CustomProgressBar
+    private val mContext = this
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_scan)
+        setContentView(binding.root)
+
+        // Set up the back button
+        binding.IMback.setOnClickListener {
+            onBackPressed()
+        }
+
+        progressDialog = CustomProgressBar(this)
+
+        // Initialize DecoratedBarcodeView (ZXing scanner view)
+        barcodeView = binding.barcodeScanner
+        barcodeView.decodeContinuous(object : BarcodeCallback {
+            override fun barcodeResult(result: BarcodeResult) {
+                // Handle the scan result
+                val scannedText = result.text
+                barcodeView.pause() // Stop scanning after receiving a result
+                makeOrderSuccess(scannedText)
+            }
+
+            override fun possibleResultPoints(resultPoints: List<com.google.zxing.ResultPoint>) {
+                // You can handle potential scan points if needed
+            }
+        })
+    }
+
+    private fun makeOrderSuccess(orderId: String) {
+        progressDialog.startDialog()
+        scope.launch {
+            FirebaseApiManager.makeOrderSuccess(orderId).let {
+                progressDialog.stopDiaolog()
+                if (it.isSuccess) {
+                    showShortToast("Order Given Successfully", mContext)
+                } else {
+                    showShortToast(it.message, mContext)
+                }
+                // Resume scanning after handling result
+                barcodeView.resume()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        barcodeView.resume() // Resume scanning
+    }
+
+    override fun onPause() {
+        barcodeView.pause() // Pause scanning to release resources
+        super.onPause()
+    }
+}
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/ProfileFragment.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Fragments
+
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import com.canteenManagment.admin.R
+
+
+class ProfileFragment : Fragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_profile, container, false)
+    }
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/MenuFragment.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Fragments
+
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.app.ActivityOptionsCompat
+import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.FragmentMenuBinding
+import com.canteenmanagment.canteen_managment_library.models.Food
+
+class MenuFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
+
+    private var _binding : FragmentMenuBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+
+
+        _binding = FragmentMenuBinding.inflate(inflater,container,false)
+
+
+        binding.snacks = Food.Category.SNACKS.value
+        binding.fixThali = Food.Category.FIX_THALI.value
+        binding.drinks = Food.Category.DRINKS.value
+        binding.punjabiMeal = Food.Category.PUNJABI_MEAL.value
+
+        binding.CL1.setOnClickListener(this)
+        binding.CL2.setOnClickListener(this)
+        binding.CL3.setOnClickListener(this)
+        binding.CL4.setOnClickListener(this)
+
+        binding.CL1.setOnLongClickListener(this)
+        binding.CL2.setOnLongClickListener(this)
+        binding.CL3.setOnLongClickListener(this)
+        binding.CL4.setOnLongClickListener(this)
+
+
+        return binding.root
+    }
+
+    override fun onClick(v: View?) {
+        var i = Intent(activity?.applicationContext,
+            FoodListActivity::class.java)
+        var options : ActivityOptionsCompat? = null
+        when(v?.id){
+            R.id.CL1 -> {
+                i.putExtra(CATEGORY_NAME,Food.Category.SNACKS.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL1,"open_transition")
+            }
+            R.id.CL2 -> {
+                i.putExtra(CATEGORY_NAME,Food.Category.FIX_THALI.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL2,"open_transition")
+            }
+            R.id.CL3 ->{
+                i.putExtra(CATEGORY_NAME,Food.Category.DRINKS.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL3,"open_transition")
+            }
+            R.id.CL4 -> {
+                i.putExtra(CATEGORY_NAME,Food.Category.PUNJABI_MEAL.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL4,"open_transition")
+            }
+        }
+
+        startActivity(i,options?.toBundle())
+
+    }
+
+    override fun onLongClick(v: View?): Boolean {
+        return true
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+
+    companion object{
+        const val CATEGORY_NAME = "TITLE_NAME"
+    }
+
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Home/PrepareOrderListRecyclerViewAdapter.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Fragments.Home
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ItemFoodListLayoutBinding
+import com.canteenManagment.admin.databinding.ItemPreparingFoodListLayoutBinding
+import com.canteenmanagment.canteen_managment_library.models.Food
+import com.canteenmanagment.canteen_managment_library.models.Order
+
+class PrepareOrderListRecyclerViewAdapter(val orderList : List<Order>, val makeOrderReady : (order : Order)-> Unit) : RecyclerView.Adapter<PrepareOrderListRecyclerViewAdapter.ViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = ItemPreparingFoodListLayoutBinding.inflate(layoutInflater,parent,false)
+        return ViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
+        holder.binding.TVOrderId.text = "Order ID : ${orderList[position].id}"
+
+        var foodList : String = ""
+        for(cartFood in orderList[position].foodList!!)
+            foodList += cartFood.food.name + " X ${cartFood.quantity}\n"
+
+        holder.binding.TVFoodItems.text = foodList
+
+        holder.binding.BTReady.setOnClickListener {
+            makeOrderReady(orderList[position])
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return orderList.size
+    }
+
+    class ViewHolder(var binding: ItemPreparingFoodListLayoutBinding) : RecyclerView.ViewHolder(binding.root)
+
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Home/HomeFragment.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Fragments.Home
+
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.FragmentHomeBinding
+import com.canteenManagment.admin.databinding.FragmentMenuBinding
+import com.canteenManagment.admin.helper.CustomProgressBar
+import com.canteenManagment.admin.ui.ScanActivity
+import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
+import com.canteenmanagment.canteen_managment_library.models.Food
+import com.canteenmanagment.canteen_managment_library.models.Order
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+class HomeFragment : Fragment() {
+
+    private var _binding : FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+    val scope = CoroutineScope(Dispatchers.Main)
+    private lateinit var orderList : MutableList<Order>
+    private lateinit var progressDialog: CustomProgressBar
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+
+        _binding = FragmentHomeBinding.inflate(inflater,container,false)
+
+        binding.RVPrepareFoodList
+
+        progressDialog = CustomProgressBar(activity as Activity)
+        loadData()
+        //test()
+
+        binding.IMScan.setOnClickListener {
+            val intent = Intent(context,ScanActivity::class.java)
+            startActivity(intent)
+        }
+
+
+
+        return binding.root
+    }
+
+    private fun loadData(){
+        progressDialog.startDialog()
+        scope.launch {
+            FirebaseApiManager.getAllInProgressOrder().let {
+                progressDialog.stopDiaolog()
+                if(it.isSuccess){
+                    orderList = it.data as MutableList<Order>
+                    binding?.RVPrepareFoodList?.adapter = PrepareOrderListRecyclerViewAdapter(orderList as List<Order>){ order -> makeOrderReady(order) }
+                }
+            }
+        }
+    }
+
+    private fun makeOrderReady(order: Order){
+        progressDialog.startDialog()
+        scope.launch {
+            FirebaseApiManager.makeOrderReady(order).let {
+                progressDialog.stopDiaolog()
+                if(it.isSuccess){
+                    orderList.remove(order)
+                    binding.RVPrepareFoodList.adapter = PrepareOrderListRecyclerViewAdapter(orderList as List<Order>){ order -> makeOrderReady(order) }
+                }
+            }
+        }
+
+    }
+
+    private fun test(){
+        scope.launch {
+            FirebaseApiManager.getRecommendedFood("1H3uTXfutCgxsnsgBIW4")
+                .let {
+                if(it.isSuccess)
+                    Log.d("Fav",(it.data as List<Food>).toString())
+            }
+
+            //Food(id = "123",name = "test",price = 1,imageUrl = "asd",category = "cat1",available = true,availableTimes = listOf<String>(),counterNumber = 1)
+
+        }
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/addFood/CustomeSpinnerAdapter.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.FoodDetail.addFood
+
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ItemCustomSpinnerBinding
+
+class CustomeSpinnerAdapter(context: Context, list: List<Int>) : ArrayAdapter<Int>(context,R.layout.item_custom_spinner,list) {
+
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        return initView(position, convertView, parent)
+    }
+
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+        return initView(position, convertView, parent)
+    }
+
+    private fun initView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val binding =
+            ItemCustomSpinnerBinding.inflate(LayoutInflater.from(context), parent, false)
+
+        binding.TVtitle.text = getItem(position).toString()
+
+        return binding.root
+    }
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/addFood/AddFoodActivity.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.FoodDetail.addFood
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.webkit.MimeTypeMap
+import androidx.databinding.DataBindingUtil
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.canteenManagment.admin.BaseActivity.BaseActivity
+import com.canteenManagment.admin.ui.Fragments.MenuFragment.Companion.CATEGORY_NAME
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ActivityAddFoodBinding
+import com.canteenManagment.admin.helper.CustomProgressBar
+import com.canteenManagment.admin.helper.showShortToast
+import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity.Companion.DATA_CHANGE
+import com.canteenmanagment.canteen_managment_library.apiManager.CustomeResult
+import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
+import com.canteenmanagment.canteen_managment_library.models.Food
+import kotlinx.coroutines.launch
+
+class AddFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickListener {
+
+    private lateinit var binding: ActivityAddFoodBinding
+    private val mContext: Context = this
+    private val progressDialog: CustomProgressBar = CustomProgressBar(this)
+    private var imageUri: Uri? = null
+
+    @SuppressLint("SetTextI18n")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_add_food
+        )
+        setContentView(binding.root)
+
+        binding.IMback.setOnClickListener(this)
+        binding.TVtitle.text = "Add ${intent.getStringExtra(CATEGORY_NAME)}"
+
+        binding.BTAdd.setOnClickListener(this)
+
+        binding.SPCounterNumber.adapter = CustomeSpinnerAdapter(this, listOf(1, 2, 3, 4, 5))
+
+        binding.IMFoodImage.setOnClickListener(this)
+        binding.IMFoodImage.setOnLongClickListener(this)
+
+
+
+
+    }
+
+    override fun onClick(v: View?) {
+
+        when (v?.id) {
+            R.id.IMback -> {
+                super.onBackPressed()
+                overridePendingTransition(
+                    android.R.anim.fade_in,
+                    R.anim.slide_out_bottom
+                )
+            }
+            R.id.BT_add -> addFood()
+
+            R.id.IM_Food_Image -> chooseImage()
+
+        }
+    }
+
+
+
+    private fun addFood() {
+
+        progressDialog.startDialog()
+        scope.launch {
+            uploadImage().let {
+
+                progressDialog.stopDiaolog()
+
+                if (it.isSuccess){
+
+                    var food = Food()
+                    food.name = binding.ETname.text.toString().trim()
+                    food.price = binding.ETPrice.text.toString().trim().toInt()
+                    food.counterNumber = binding.SPCounterNumber.selectedItemPosition + 1
+                    food.category = intent.getStringExtra(CATEGORY_NAME)
+                    food.available = true
+                    food.imageurl = it.data.toString()
+
+                    food.availableTimes = getSelectedChip()
+                    Log.d("AvailableTimes",food.availableTimes.toString())
+
+                    progressDialog.startDialog()
+
+                    scope.launch {
+
+                        FirebaseApiManager.storeFoodData(food).let {
+                            progressDialog.stopDiaolog()
+                            when (it.isSuccess) {
+                                true -> {
+                                    showShortToast(it.message, mContext)
+                                    setResult(DATA_CHANGE)
+                                    super.onBackPressed()
+                                    overridePendingTransition(
+                                        R.anim.slide_in_top,
+                                        R.anim.slide_out_bottom
+                                    )
+                                }
+
+                                false -> showShortToast(it.message, mContext)
+                            }
+                        }
+                    }
+                }
+
+                else
+                    showShortToast(it.message,mContext)
+            }
+
+        }
+
+
+    }
+
+    private suspend fun uploadImage() : CustomeResult {
+        if (imageUri != null) {
+
+            val cr = contentResolver
+            val mine = MimeTypeMap.getSingleton()
+
+            var filename = binding.ETname.text.toString()
+                .trim() + "." + mine.getExtensionFromMimeType(imageUri?.let { cr.getType(it) })
+
+            FirebaseApiManager.uploadFile(imageUri!!,
+                filename,
+                FirebaseApiManager.BaseUrl.FOOD + "/" + binding.ETname.text.toString().trim()).let {
+
+                return it
+            }
+
+
+
+
+        } else
+            return CustomeResult(false,"Please Select image")
+
+
+    }
+
+    private fun chooseImage() {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(intent, CHOOSE_IMAGE)
+    }
+
+    private fun getSelectedChip() : List<String>{
+
+        var timeList = mutableListOf<String>()
+
+        if(binding.CHMorning.isChecked)
+            timeList.add("Morning")
+
+        if(binding.CHAfternoon.isChecked)
+            timeList.add("Afternoon")
+
+        if(binding.CHEvening.isChecked)
+            timeList.add("Evening")
+
+        return timeList
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        overridePendingTransition(
+            R.anim.slide_in_top,
+            R.anim.slide_out_bottom
+        )
+    }
+
+    override fun onLongClick(v: View?): Boolean {
+        return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CHOOSE_IMAGE && resultCode == RESULT_OK && data != null && data.data != null) {
+            imageUri = data.data
+
+            Glide.with(this)
+                .load(imageUri)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .placeholder(R.drawable.error_image)
+                .error(R.drawable.error_image)
+                .into(binding.IMFoodImage)
+        }
+    }
+
+
+    companion object {
+        const val CHOOSE_IMAGE = 2001
+    }
+
+
+}
+
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/editFood/EditFoodActivity.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.FoodDetail.editFood
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.view.View
+import android.webkit.MimeTypeMap
+import androidx.databinding.DataBindingUtil
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.canteenManagment.admin.BaseActivity.BaseActivity
+import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity.Companion.FOOD_ITEM
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ActivityEditFoodBinding
+import com.canteenManagment.admin.helper.CustomProgressBar
+import com.canteenManagment.admin.helper.DeleteCustomDialog
+import com.canteenManagment.admin.helper.showShortToast
+import com.canteenManagment.admin.ui.FoodDetail.addFood.CustomeSpinnerAdapter
+import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity
+import com.canteenmanagment.canteen_managment_library.apiManager.CustomeResult
+import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
+import com.canteenmanagment.canteen_managment_library.models.Food
+import kotlinx.coroutines.launch
+
+class EditFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickListener {
+
+    private lateinit var binding: ActivityEditFoodBinding
+    private val mContext: Context = this
+    private val progressDialog: CustomProgressBar = CustomProgressBar(this)
+    private val deleteDialog: DeleteCustomDialog = DeleteCustomDialog(this)
+    private var imageUri: Uri? = null
+    private lateinit var food: Food
+
+    @SuppressLint("SetTextI18n")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_edit_food
+        )
+        setContentView(binding.root)
+
+        food = intent.getSerializableExtra(FOOD_ITEM) as Food
+
+        binding.IMback.setOnClickListener(this)
+        binding.TVtitle.text = "Update Item"
+
+        binding.ETname.setText(food.name.toString())
+        binding.ETPrice.setText(food.price.toString())
+
+        binding.SPCounterNumber.adapter = CustomeSpinnerAdapter(this, listOf(1, 2, 3, 4, 5))
+        food.counterNumber?.let {
+            binding.SPCounterNumber.setSelection(it-1,true)
+        }
+        if(food.availableTimes?.contains("Morning") == true)
+            binding.CHMorning.isChecked = true
+        if(food.availableTimes?.contains("Afternoon") == true)
+            binding.CHAfternoon.isChecked = true
+        if(food.availableTimes?.contains("Evening") == true)
+            binding.CHEvening.isChecked = true
+
+
+        Glide.with(this)
+            .load(food.imageurl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .centerCrop()
+            .placeholder(R.drawable.error_image)
+            .error(R.drawable.error_image)
+            .into(binding.IMFoodImage)
+
+        binding.BTUpdate.setOnClickListener(this)
+        binding.BTDeleteFood.setOnClickListener(this)
+
+        binding.IMFoodImage.setOnClickListener(this)
+        binding.IMFoodImage.setOnLongClickListener(this)
+    }
+
+    private fun getSelectedChip() : List<String>{
+
+        var timeList = mutableListOf<String>()
+
+        if(binding.CHMorning.isChecked)
+            timeList.add("Morning")
+
+        if(binding.CHAfternoon.isChecked)
+            timeList.add("Afternoon")
+
+        if(binding.CHEvening.isChecked)
+            timeList.add("Evening")
+
+        return timeList
+    }
+
+    override fun onClick(v: View?) {
+
+        when (v?.id) {
+            R.id.IMback -> {
+                super.onBackPressed()
+            }
+            R.id.BT_update -> updateFood()
+
+            R.id.IM_Food_Image -> chooseImage()
+
+            R.id.BT_Delete_food -> deleteDialog.startDialog{
+                deleteFood()
+            }
+
+        }
+    }
+
+    override fun onLongClick(v: View?): Boolean {
+        return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CHOOSE_IMAGE && resultCode == RESULT_OK && data != null && data.data != null) {
+            imageUri = data.data
+
+            Glide.with(this)
+                .load(imageUri)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .placeholder(R.drawable.error_image)
+                .error(R.drawable.error_image)
+                .into(binding.IMFoodImage)
+        }
+    }
+
+    private fun updateFood() {
+
+        progressDialog.startDialog()
+        scope.launch {
+            uploadImage().let {
+
+                progressDialog.stopDiaolog()
+
+                if (it.isSuccess || it.message.equals("Please Select image")){
+
+                    food.name = binding.ETname.text.toString().trim()
+                    food.price = binding.ETPrice.text.toString().trim().toInt()
+                    food.counterNumber = binding.SPCounterNumber.selectedItemPosition + 1
+
+                    food.availableTimes = getSelectedChip()
+
+                    if(it.data != null)
+                        food.imageurl = it.data.toString()
+
+                    progressDialog.startDialog()
+
+                    scope.launch {
+
+                        FirebaseApiManager.updateFoodData(food).let {
+                            progressDialog.stopDiaolog()
+                            when (it.isSuccess) {
+                                true -> {
+                                    showShortToast(it.message, mContext)
+                                    setResult(FoodListActivity.DATA_CHANGE)
+                                    super.onBackPressed()
+                                }
+
+                                false -> showShortToast(it.message, mContext)
+                            }
+                        }
+                    }
+
+                }
+
+                else
+                    showShortToast(it.message,mContext)
+            }
+        }
+    }
+
+    private suspend fun uploadImage() : CustomeResult {
+        if (imageUri != null) {
+
+            val cr = contentResolver
+            val mine = MimeTypeMap.getSingleton()
+
+            var filename = binding.ETname.text.toString()
+                .trim() + "." + mine.getExtensionFromMimeType(imageUri?.let { cr.getType(it) })
+
+            FirebaseApiManager.uploadFile(imageUri!!,
+                filename,
+                FirebaseApiManager.BaseUrl.FOOD + "/" + binding.ETname.text.toString().trim()).let {
+
+                return it
+            }
+
+        } else
+            return CustomeResult(false,"Please Select image")
+
+    }
+
+    private fun deleteFood(){
+        scope.launch {
+            FirebaseApiManager.deleteFoodData(food).let {
+                deleteDialog.stopDialog()
+                when (it.isSuccess) {
+                    true -> {
+                        showShortToast(it.message, mContext)
+                        setResult(FoodListActivity.DATA_CHANGE)
+                        super.onBackPressed()
+                    }
+
+                    false -> showShortToast(it.message, mContext)
+                }
+            }
+        }
+    }
+
+    private fun chooseImage() {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(intent, CHOOSE_IMAGE)
+    }
+
+    companion object {
+        const val CHOOSE_IMAGE = 2001
+    }
+}
+
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/listFood/FoodListActivity.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.FoodDetail.listFood
+
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import androidx.databinding.DataBindingUtil
+import com.canteenManagment.admin.BaseActivity.BaseActivity
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ActivityFoodListBinding
+import com.canteenManagment.admin.helper.CustomProgressBar
+import com.canteenManagment.admin.helper.showShortToast
+import com.canteenManagment.admin.ui.FoodDetail.addFood.AddFoodActivity
+import com.canteenManagment.admin.ui.FoodDetail.editFood.EditFoodActivity
+import com.canteenManagment.admin.ui.Fragments.MenuFragment.Companion.CATEGORY_NAME
+import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
+import com.canteenmanagment.canteen_managment_library.models.Food
+import kotlinx.coroutines.launch
+
+class FoodListActivity : BaseActivity(), View.OnClickListener {
+
+    lateinit var binding: ActivityFoodListBinding
+    private val mContext: Context = this
+    private lateinit var foodList: List<Food>
+    private val progressDialog: CustomProgressBar = CustomProgressBar(this)
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_food_list)
+
+        binding = DataBindingUtil.setContentView(this,
+            R.layout.activity_food_list
+        )
+        binding.title = intent.getStringExtra(CATEGORY_NAME)
+
+        binding.IMback.setOnClickListener(this)
+
+        binding.FABadd.setOnClickListener(this)
+
+        loadData()
+
+        //binding.SRRefreshLayout.setRefreshStyle(PullRefreshLayout.STYLE_RING)
+        binding.SRRefreshLayout.setOnRefreshListener {
+            loadData()
+        }
+
+
+    }
+
+    private fun loadData() {
+        scope.launch {
+            FirebaseApiManager.getAllFoodFromCategory(intent.getStringExtra(CATEGORY_NAME)!!).let {
+                binding.SRRefreshLayout.isRefreshing = false
+                foodList = it
+                binding.RVFoodList.visibility = View.VISIBLE
+                binding.RVFoodList.adapter = FoodListRecyclerViewAdapter(it,
+                    FoodListRecyclerViewAdapter.ClickListener(
+                        { position ->
+                            val i = Intent(mContext, EditFoodActivity::class.java)
+                            i.putExtra(FOOD_ITEM, foodList.get(position))
+                            startActivityForResult(i, DATA_CHANGE)
+                        },
+                        { position,status ->
+                            var food = foodList.get(position)
+                            food.available = status
+                            updateFood(food)
+                        })
+                )
+            }
+        }
+    }
+
+    private fun updateFood(food: Food) {
+
+        progressDialog.startDialog()
+
+        scope.launch {
+
+            FirebaseApiManager.updateFoodData(food).let {
+                progressDialog.stopDiaolog()
+                when (it.isSuccess) {
+                    true -> {
+                        //showShortToast(it.message, mContext)
+                    }
+
+                    false -> showShortToast(it.message, mContext)
+                }
+            }
+
+        }
+
+
+    }
+
+    override fun onClick(v: View?) {
+
+        when (v?.id) {
+
+            R.id.IMback -> onBackPressed()
+
+            R.id.FABadd -> {
+                var i = Intent(this, AddFoodActivity::class.java)
+                i.putExtra(CATEGORY_NAME, intent.getStringExtra(CATEGORY_NAME))
+                startActivityForResult(i, DATA_CHANGE)
+                overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
+            }
+        }
+    }
+
+    override fun onBackPressed() {
+        binding.CL.visibility = View.INVISIBLE
+        super.onBackPressed()
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == DATA_CHANGE) {
+            binding.RVFoodList.visibility = View.GONE
+            loadData()
+        }
+    }
+
+    companion object {
+        const val FOOD_ITEM = "Food Item"
+        const val DATA_CHANGE = 2002
+
+    }
+
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/listFood/FoodListRecyclerViewAdapter.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.FoodDetail.listFood
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ItemFoodListLayoutBinding
+import com.canteenmanagment.canteen_managment_library.models.Food
+
+class FoodListRecyclerViewAdapter(
+    private val foodList: List<Food>,
+    private val listener: ClickListener
+) : RecyclerView.Adapter<FoodListRecyclerViewAdapter.ViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = ItemFoodListLayoutBinding.inflate(layoutInflater, parent, false)
+        return ViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val food = foodList[position]
+
+        // Set up UI elements
+        holder.binding.apply {
+            TVTitle.text = food.name
+            TVPrice.text = "${food.price} Rs."
+
+            // Set availability
+            TBAvailable.isChecked = food.available
+
+            // Set on click listeners
+            root.setOnClickListener { listener.openActivity(position) }
+            TBAvailable.setOnClickListener {
+                listener.changeFoodStatus(position, TBAvailable.isChecked)
+            }
+
+            // Load food image using Glide with caching and error handling
+            Glide.with(root.context)
+                .load(food.imageurl)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .placeholder(R.drawable.error_image)
+                .error(R.drawable.error_image)
+                .into(IMFoodImage)
+        }
+    }
+
+    override fun getItemCount(): Int = foodList.size
+
+    // ViewHolder class with binding
+    class ViewHolder(val binding: ItemFoodListLayoutBinding) : RecyclerView.ViewHolder(binding.root)
+
+    // Listener class with lambdas for item clicks and food status updates
+    class ClickListener(
+        val openActivity: (Int) -> Unit,
+        val changeFoodStatus: (Int, Boolean) -> Unit
+    )
+}
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/BaseActivity/BaseActivity.kt
+----------------------------------------
+package com.canteenManagment.admin.BaseActivity
+
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+
+open class BaseActivity : AppCompatActivity() {
+
+    val scope = CoroutineScope(Dispatchers.Main)
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/helper/helper.kt
+----------------------------------------
+package com.canteenManagment.admin.helper
+
+import android.content.Context
+import android.widget.Toast
+
+fun showLongToast(massage : String,mContext : Context){
+    Toast.makeText(mContext,massage,Toast.LENGTH_LONG).show()
+}
+
+fun showShortToast(massage : String,mContext : Context?){
+    Toast.makeText(mContext,massage,Toast.LENGTH_SHORT).show()
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/helper/CustomProgressBar.kt
+----------------------------------------
+package com.canteenManagment.admin.helper
+
+//import kotlinx.android.synthetic.main.progress_bar.view.*
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
+import android.view.LayoutInflater
+import com.canteenManagment.admin.R
+
+class CustomProgressBar(val activity : Activity) {
+
+    lateinit var alertDialog : Dialog
+
+    fun startDialog(){
+
+        var dialog = AlertDialog.Builder(activity)
+
+        var view = LayoutInflater.from(activity).inflate(R.layout.progress_bar,null)
+
+        dialog.setView(view)
+
+        alertDialog = dialog.create()
+        alertDialog.show()
+        alertDialog.getWindow()?.setBackgroundDrawableResource(android.R.color.transparent)
+
+    }
+    fun stopDiaolog(){
+        alertDialog.dismiss()
+    }
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/helper/DeleteCustomDiolog.kt
+----------------------------------------
+package com.canteenManagment.admin.helper
+
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
+import android.view.LayoutInflater
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.DeleteCustomeDiologBinding // Ensure the generated binding import is correct
+
+class DeleteCustomDialog(private val activity: Activity) {
+
+    private lateinit var alertDialog: Dialog
+    private lateinit var binding: DeleteCustomeDiologBinding
+
+    fun startDialog(deleteFood: () -> Unit) {
+        // Inflate the layout with ViewBinding
+        binding = DeleteCustomeDiologBinding.inflate(LayoutInflater.from(activity))
+
+        // Initialize AlertDialog builder
+        val dialogBuilder = AlertDialog.Builder(activity)
+
+        // Set up button click listeners with ViewBinding
+        binding.BTCancel.setOnClickListener {
+            alertDialog.dismiss()
+        }
+        binding.BTDelete.setOnClickListener {
+            deleteFood()
+        }
+
+        dialogBuilder.setView(binding.root)
+
+        alertDialog = dialogBuilder.create()
+        alertDialog.show()
+        alertDialog.setCancelable(true)
+        alertDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    }
+
+    fun stopDialog() {
+        alertDialog.dismiss()
+    }
+}
+
+========================================
+
+File: app/src/main/assets/loading.json
+----------------------------------------
+{"v":"5.5.8","fr":25,"ip":0,"op":50,"w":250,"h":250,"nm":"合成 2","ddd":0,"assets":[],"layers":[{"ddd":0,"ind":1,"ty":4,"nm":"形状图层 1","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0]},{"t":49,"s":[720]}],"ix":10},"p":{"a":0,"k":[123,124,0],"ix":2},"a":{"a":0,"k":[18,2,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"d":1,"ty":"el","s":{"a":0,"k":[157.383,157.383],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"nm":"椭圆路径 1","mn":"ADBE Vector Shape - Ellipse","hd":false},{"ty":"st","c":{"a":0,"k":[0.8705882352941177,0.3843137254901961,0.3843137254901961,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":26,"ix":5},"lc":2,"lj":2,"bm":0,"d":[{"n":"d","nm":"虚线","v":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0]},{"t":49,"s":[0]}],"ix":1}},{"n":"g","nm":"间隙","v":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[532]},{"t":49,"s":[62]}],"ix":2}},{"n":"o","nm":"偏移","v":{"a":0,"k":0,"ix":7}}],"nm":"描边 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"tr","p":{"a":0,"k":[17.691,-0.309],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0]},{"t":1,"s":[100]}],"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"变换"}],"nm":"椭圆 1","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":50,"st":0,"bm":0}],"markers":[]}
+========================================
+
+File: app/src/main/res/drawable/ic_assignment_24px.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M7,15h7v2L7,17zM7,11h10v2L7,13zM7,7h10v2L7,9zM19,3h-4.18C14.4,1.84 13.3,1 12,1c-1.3,0 -2.4,0.84 -2.82,2L5,3c-0.14,0 -0.27,0.01 -0.4,0.04 -0.39,0.08 -0.74,0.28 -1.01,0.55 -0.18,0.18 -0.33,0.4 -0.43,0.64 -0.1,0.23 -0.16,0.49 -0.16,0.77v14c0,0.27 0.06,0.54 0.16,0.78s0.25,0.45 0.43,0.64c0.27,0.27 0.62,0.47 1.01,0.55 0.13,0.02 0.26,0.03 0.4,0.03h14c1.1,0 2,-0.9 2,-2L21,5c0,-1.1 -0.9,-2 -2,-2zM12,2.75c0.41,0 0.75,0.34 0.75,0.75s-0.34,0.75 -0.75,0.75 -0.75,-0.34 -0.75,-0.75 0.34,-0.75 0.75,-0.75zM19,19L5,19L5,5h14v14z"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/ic_arrow_back_24px.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M20,11H7.83l5.59,-5.59L12,4l-8,8 8,8 1.41,-1.41L7.83,13H20v-2z"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/ic_error_image_background.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    android:height="108dp"
+    android:width="108dp"
+    android:viewportHeight="108"
+    android:viewportWidth="108"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#3DDC84"
+          android:pathData="M0,0h108v108h-108z"/>
+    <path android:fillColor="#00000000" android:pathData="M9,0L9,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,0L19,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M29,0L29,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M39,0L39,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M49,0L49,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M59,0L59,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M69,0L69,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M79,0L79,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M89,0L89,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M99,0L99,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,9L108,9"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,19L108,19"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,29L108,29"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,39L108,39"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,49L108,49"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,59L108,59"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,69L108,69"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,79L108,79"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,89L108,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,99L108,99"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,29L89,29"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,39L89,39"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,49L89,49"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,59L89,59"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,69L89,69"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,79L89,79"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M29,19L29,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M39,19L39,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M49,19L49,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M59,19L59,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M69,19L69,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M79,19L79,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/ic_add_24px.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/bottom_navbar_style.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <corners
+        android:topRightRadius="8dp"
+        android:topLeftRadius="8dp">
+    </corners>
+
+</shape>
+========================================
+
+File: app/src/main/res/drawable/btn_style.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <corners android:radius="@dimen/small"/>
+
+</shape>
+========================================
+
+File: app/src/main/res/drawable/ic_baseline_center_focus_weak_24.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="30dp"
+    android:height="30dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@android:color/black">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M5,15L3,15v4c0,1.1 0.9,2 2,2h4v-2L5,19v-4zM5,5h4L9,3L5,3c-1.1,0 -2,0.9 -2,2v4h2L5,5zM19,3h-4v2h4v4h2L21,5c0,-1.1 -0.9,-2 -2,-2zM19,19h-4v2h4c1.1,0 2,-0.9 2,-2v-4h-2v4zM12,8c-2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4 -1.79,-4 -4,-4zM12,14c-1.1,0 -2,-0.9 -2,-2s0.9,-2 2,-2 2,0.9 2,2 -0.9,2 -2,2z"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/ic_arrow_left_24px.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="25dp"
+    android:height="30dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M15.41,16.59L10.83,12l4.58,-4.59L14,6l-6,6 6,6 1.41,-1.41z"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/ic_profile_24px.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M12,6c1.1,0 2,0.9 2,2s-0.9,2 -2,2 -2,-0.9 -2,-2 0.9,-2 2,-2m0,9c2.7,0 5.8,1.29 6,2v1L6,18v-0.99c0.2,-0.72 3.3,-2.01 6,-2.01m0,-11C9.79,4 8,5.79 8,8s1.79,4 4,4 4,-1.79 4,-4 -1.79,-4 -4,-4zM12,13c-2.67,0 -8,1.34 -8,4v3h16v-3c0,-2.66 -5.33,-4 -8,-4z"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/error_image.jpg
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/drawable/ic_home_24px.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M12,5.69l5,4.5V18h-2v-6H9v6H7v-7.81l5,-4.5M12,3L2,12h3v8h6v-6h2v6h6v-8h3L12,3z"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/drawable/ic_launcher_background.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    android:height="108dp"
+    android:width="108dp"
+    android:viewportHeight="108"
+    android:viewportWidth="108"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#3DDC84"
+          android:pathData="M0,0h108v108h-108z"/>
+    <path android:fillColor="#00000000" android:pathData="M9,0L9,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,0L19,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M29,0L29,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M39,0L39,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M49,0L49,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M59,0L59,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M69,0L69,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M79,0L79,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M89,0L89,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M99,0L99,108"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,9L108,9"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,19L108,19"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,29L108,29"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,39L108,39"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,49L108,49"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,59L108,59"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,69L108,69"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,79L108,79"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,89L108,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M0,99L108,99"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,29L89,29"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,39L89,39"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,49L89,49"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,59L89,59"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,69L89,69"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M19,79L89,79"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M29,19L29,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M39,19L39,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M49,19L49,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M59,19L59,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M69,19L69,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+    <path android:fillColor="#00000000" android:pathData="M79,19L79,89"
+          android:strokeColor="#33FFFFFF" android:strokeWidth="0.8"/>
+</vector>
+
+========================================
+
+File: app/src/main/res/font/mavenpro_regular.ttf
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x95 in position 17: invalid start byte
+
+========================================
+
+File: app/src/main/res/font/mavenpro_bold.ttf
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x95 in position 17: invalid start byte
+
+========================================
+
+File: app/src/main/res/font/mavenpro_semi_bold.ttf
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x95 in position 17: invalid start byte
+
+========================================
+
+File: app/src/main/res/font/mavenpro_medium.ttf
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x95 in position 17: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-hdpi/ic_error_image_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-hdpi/ic_error_image_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-hdpi/ic_error_image.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-hdpi/ic_launcher.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/drawable-v24/juice.jpg
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/drawable-v24/ic_launcher_foreground.xml
+----------------------------------------
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="85.84757"
+                android:endY="92.4963"
+                android:startX="42.9492"
+                android:startY="49.59793"
+                android:type="linear">
+                <item
+                    android:color="#44000000"
+                    android:offset="0.0" />
+                <item
+                    android:color="#00000000"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="nonZero"
+        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+</vector>
+========================================
+
+File: app/src/main/res/drawable-v24/fix_thali.jpg
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/drawable-v24/snacks.jpg
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/drawable-v24/sabji_roti.jpg
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/menu/bottom_menu.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/home"
+        android:title="Home"
+        android:icon="@drawable/ic_home_24px"/>
+
+    <item
+        android:id="@+id/menu"
+        android:title="Menu"
+        android:icon="@drawable/ic_assignment_24px"/>
+
+    <!-- Uncomment if needed
+    <item
+        android:id="@+id/profile"
+        android:title="Profile"
+        android:icon="@drawable/ic_profile_24px"/>
+    -->
+</menu>
+
+========================================
+
+File: app/src/main/res/mipmap-anydpi-v26/ic_error_image.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_error_image_background"/>
+    <foreground android:drawable="@mipmap/ic_error_image_foreground"/>
+</adaptive-icon>
+========================================
+
+File: app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>
+========================================
+
+File: app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>
+========================================
+
+File: app/src/main/res/mipmap-anydpi-v26/ic_error_image_round.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_error_image_background"/>
+    <foreground android:drawable="@mipmap/ic_error_image_foreground"/>
+</adaptive-icon>
+========================================
+
+File: app/src/main/res/layout/fragment_menu.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable name="Snacks" type="String" />
+        <variable name="Fix_thali" type="String" />
+        <variable name="Drinks" type="String" />
+        <variable name="Punjabi_meal" type="String" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/fragment_style"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.Fragments.MenuFragment">
+
+        <TextView
+            android:id="@+id/textView"
+            style="@style/title_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/menu"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/CV1"
+            style="@style/menu_card_view_style"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/guideline2"
+            app:layout_constraintEnd_toStartOf="@+id/guideline1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:src="@drawable/snacks" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/CL1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:transitionName="open_transition">
+
+                <TextView
+                    style="@style/menu_title_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{Snacks}"
+                    tools:text="Snacks"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.40"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.75" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/CV2"
+            style="@style/menu_card_view_style"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:backgroundTint="@android:color/holo_blue_bright"
+            app:layout_constraintBottom_toTopOf="@+id/guideline3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline1"
+            app:layout_constraintTop_toBottomOf="@+id/textView">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:src="@drawable/fix_thali" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/CL2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:transitionName="open_transition">
+
+                <TextView
+                    style="@style/menu_title_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{Fix_thali}"
+                    tools:text="Fix Thali"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.90" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/CV3"
+            style="@style/menu_card_view_style"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="@dimen/small"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/CV1">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:src="@drawable/juice" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/CL3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:transitionName="open_transition">
+
+                <TextView
+                    style="@style/menu_title_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{Drinks}"
+                    tools:text="Drinks"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.50"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.65" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/CV4"
+            style="@style/menu_card_view_style"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="@dimen/small"
+            android:backgroundTint="@android:color/holo_orange_dark"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline1"
+            app:layout_constraintTop_toBottomOf="@+id/CV2">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:src="@drawable/sabji_roti" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/CL4"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:transitionName="open_transition">
+
+                <TextView
+                    style="@style/menu_title_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{Punjabi_meal}"
+                    tools:text="Punjabi Meal"
+                    android:textAlignment="center"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.50"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.50" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.50" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.6" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.45" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
+========================================
+
+File: app/src/main/res/layout/activity_add_food.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.FoodDetail.addFood.AddFoodActivity">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/IMback"
+                style="@style/back_button_style"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/TVtitle"
+                style="@style/sub_title_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Add Food Item" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Name"
+                app:layout_constraintBottom_toTopOf="@+id/textInputLayout"
+                app:layout_constraintTop_toBottomOf="@+id/TVtitle"
+                app:layout_constraintVertical_bias="0.16000003"
+                app:layout_constraintVertical_chainStyle="packed">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ETname"
+                    style="@style/edit_text_style"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Price"
+                app:layout_constraintBottom_toTopOf="@+id/SP_Counter_Number"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout2"
+                app:suffixText="(In Rs.)"
+                app:suffixTextAppearance="@dimen/small"
+                tools:layout_editor_absoluteX="0dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ETPrice"
+                    style="@style/edit_text_style"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/medium"
+                android:text="Counter Number : "
+                android:textSize="@dimen/medium"
+                app:layout_constraintBottom_toBottomOf="@+id/SP_Counter_Number"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/SP_Counter_Number" />
+
+            <Spinner
+                android:id="@+id/SP_Counter_Number"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toTopOf="@+id/CG"
+                app:layout_constraintCircleRadius="@dimen/medium"
+                app:layout_constraintStart_toEndOf="@+id/textView3"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/CG"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/medium"
+                android:layout_marginTop="@dimen/medium"
+                android:layout_marginRight="@dimen/medium"
+                app:layout_constraintBottom_toTopOf="@+id/CV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/SP_Counter_Number">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/CH_morning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="Morning"
+                    android:theme="@style/Theme.MaterialComponents.Light" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/CH_afternoon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="Afternoon"
+                    android:theme="@style/Theme.MaterialComponents.Light" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/CH_evening"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="Evening"
+                    android:theme="@style/Theme.MaterialComponents.Light" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/CV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/medium"
+                app:cardCornerRadius="@dimen/medium"
+                app:cardElevation="1dp"
+                app:layout_constraintBottom_toTopOf="@+id/BT_add"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/CG">
+
+                <ImageView
+                    android:id="@+id/IM_Food_Image"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:background="@color/whiteColour" />
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Click above to select Image)"
+                app:layout_constraintEnd_toEndOf="@+id/CV"
+                app:layout_constraintTop_toBottomOf="@+id/CV" />
+
+
+            <Button
+                android:id="@+id/BT_add"
+                style="@style/btn_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/large"
+                android:background="@drawable/btn_style"
+                android:text="Add"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/CV" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</layout>
+========================================
+
+File: app/src/main/res/layout/item_food_list_layout.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/small"
+        app:cardCornerRadius="@dimen/small"
+        android:elevation="0dp"
+        >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/CL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/IM_Food_Image"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/TV_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small"
+                android:layout_marginLeft="@dimen/medium"
+                android:textColor="@color/blackColour"
+                android:textSize="24sp"
+                app:layout_constraintStart_toEndOf="@+id/IM_Food_Image"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Title"/>
+
+            <TextView
+                android:id="@+id/TV_Price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small"
+                app:layout_constraintStart_toStartOf="@+id/TV_title"
+                app:layout_constraintTop_toBottomOf="@+id/TV_title"
+                tools:text="0 Rs." />
+
+            <androidx.appcompat.widget.AppCompatToggleButton
+                android:id="@+id/TB_available"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/medium"
+                android:layout_marginBottom="@dimen/small"
+                android:textSize="10sp"
+                android:textOff="Unavailable"
+                android:textOn="Available"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</layout>
+========================================
+
+File: app/src/main/res/layout/delete_custome_diolog.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/transparent">
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cp_bg_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:cardCornerRadius="@dimen/small">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/medium"
+            android:backgroundTint="@color/whiteColour">
+
+            <TextView
+                android:id="@+id/cp_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/medium"
+                android:text="Are you sure you want to DELETE this food item?"
+                android:textAlignment="center"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/BT_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/large"
+                android:layout_marginRight="@dimen/large"
+                android:background="@drawable/btn_style"
+                android:backgroundTint="#2089AC"
+                android:textColor="@color/whiteColour"
+                android:text="Canccel"
+                app:layout_constraintEnd_toStartOf="@+id/BT_delete"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cp_title" />
+
+            <Button
+                android:id="@+id/BT_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_style"
+                android:backgroundTint="@android:color/holo_red_light"
+                android:textColor="@color/whiteColour"
+                android:layout_marginLeft="@dimen/medium"
+                android:layout_marginTop="@dimen/large"
+                android:text="DELETE"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/BT_cancel"
+                app:layout_constraintTop_toBottomOf="@+id/cp_title" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>
+========================================
+
+File: app/src/main/res/layout/activity_edit_food.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.FoodDetail.editFood.EditFoodActivity">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/CL"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/IMback"
+            style="@style/back_button_style"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/TVtitle"
+            style="@style/sub_title_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Edit Food Item" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/TVtitle">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/medium"
+                    android:hint="Name"
+                    app:layout_constraintBottom_toTopOf="@+id/textInputLayout"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.16"
+                    app:layout_constraintVertical_chainStyle="packed">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/ETname"
+                        style="@style/edit_text_style"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Price"
+                    app:layout_constraintBottom_toTopOf="@+id/SP_Counter_Number"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout2"
+                    app:suffixText="(In Rs.)"
+                    app:suffixTextAppearance="@dimen/small"
+                    tools:layout_editor_absoluteX="0dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/ETPrice"
+                        style="@style/edit_text_style"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/medium"
+                    android:text="Counter Number : "
+                    android:textSize="@dimen/medium"
+                    app:layout_constraintBottom_toBottomOf="@+id/SP_Counter_Number"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/SP_Counter_Number" />
+
+                <Spinner
+                    android:id="@+id/SP_Counter_Number"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    app:layout_constraintBottom_toTopOf="@+id/CG"
+                    app:layout_constraintCircleRadius="@dimen/medium"
+                    app:layout_constraintStart_toEndOf="@+id/textView3"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/CG"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/medium"
+                    android:layout_marginTop="@dimen/medium"
+                    android:layout_marginRight="@dimen/medium"
+                    app:layout_constraintBottom_toTopOf="@+id/CV"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/SP_Counter_Number">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/CH_morning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="Morning"
+                        android:theme="@style/Theme.MaterialComponents.Light" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/CH_afternoon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="Afternoon"
+                        android:theme="@style/Theme.MaterialComponents.Light" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/CH_evening"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="Evening"
+                        android:theme="@style/Theme.MaterialComponents.Light" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/CV"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_margin="@dimen/medium"
+                    app:cardCornerRadius="@dimen/medium"
+                    app:cardElevation="1dp"
+                    app:layout_constraintBottom_toTopOf="@+id/BT_update"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/CG">
+
+                    <ImageView
+                        android:id="@+id/IM_Food_Image"
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:background="@color/whiteColour" />
+
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(Click above to select Image)"
+                    app:layout_constraintEnd_toEndOf="@+id/CV"
+                    app:layout_constraintTop_toBottomOf="@+id/CV" />
+
+
+                <Button
+                    android:id="@+id/BT_update"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/medium"
+                    android:layout_marginTop="36dp"
+                    android:layout_marginRight="@dimen/medium"
+                    android:background="@drawable/btn_style"
+                    android:backgroundTint="@android:color/holo_blue_dark"
+                    android:text="Update"
+                    android:textColor="@color/whiteColour"
+                    app:layout_constraintBottom_toTopOf="@+id/BT_Delete_food"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/CV" />
+
+                <Button
+                    android:id="@+id/BT_Delete_food"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/medium"
+                    android:background="@drawable/btn_style"
+                    android:backgroundTint="@android:color/holo_red_light"
+                    android:text="Delete Item"
+                    android:textColor="@color/whiteColour"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/BT_update"
+                    app:layout_constraintVertical_bias="0.87" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>
+========================================
+
+File: app/src/main/res/layout/item_custom_spinner.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/TVtitle"
+            tools:text="Title"
+            android:textSize="@dimen/medium"
+            android:padding="@dimen/small"
+            android:textAlignment="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+    </androidx.cardview.widget.CardView>
+
+</layout>
+========================================
+
+File: app/src/main/res/layout/fragment_profile.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.Fragments.ProfileFragment"
+    style="@style/fragment_style">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Profile"
+        style="@style/title_style"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+========================================
+
+File: app/src/main/res/layout/item_preparing_food_list_layout.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/small"
+        app:cardCornerRadius="@dimen/small"
+        android:elevation="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/CL"
+            android:padding="@dimen/small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/TV_order_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Order Id : cbdjbcjkweklswkkINndwk" />
+
+            <TextView
+                android:id="@+id/TV_food_items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/medium"
+                android:textColor="@android:color/black"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/TV_order_id"
+                app:layout_constraintTop_toBottomOf="@+id/TV_order_id"
+                tools:text="abc X 3\npqr X 4\nxyz X 2" />
+
+            <Button
+                android:id="@+id/BT_ready"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ready"
+                android:textAllCaps="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</layout>
+========================================
+
+File: app/src/main/res/layout/activity_food_list.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="title"
+            type="String" />
+    </data>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/SR_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/whiteColour"
+        >
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/CL"
+            style="@style/fragment_style"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:transitionName="open_transition"
+            tools:context=".ui.FoodDetail.listFood.FoodListActivity">
+
+            <ImageView
+                android:id="@+id/IMback"
+                style="@style/back_button_style"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/TVtitle"
+                style="@style/sub_title_style"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{title}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Title" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/RV_FoodList"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/medium"
+                android:scrollbars="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/TVtitle"
+
+                tools:itemCount="7"
+                tools:listitem="@layout/item_food_list_layout" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/FABadd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/large"
+                android:src="@drawable/ic_add_24px"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</layout>
+========================================
+
+File: app/src/main/res/layout/fragment_home.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.Fragments.Home.HomeFragment"
+    style="@style/fragment_style">
+
+    <TextView
+        android:id="@+id/textView4"
+        style="@style/title_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dashboard"
+        android:paddingBottom="@dimen/medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/IM_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/medium"
+        android:src="@drawable/ic_baseline_center_focus_weak_24"
+        app:layout_constraintBottom_toBottomOf="@+id/textView4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView4" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/RV_prepare_food_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/item_preparing_food_list_layout"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+========================================
+
+File: app/src/main/res/layout/activity_scan.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/CL"
+        style="@style/fragment_style"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:transitionName="open_transition"
+        tools:context=".ui.ScanActivity">
+
+        <ImageView
+            android:id="@+id/IMback"
+            style="@style/back_button_style"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/TVtitle"
+            style="@style/sub_title_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Replace CodeScannerView with DecoratedBarcodeView -->
+        <com.journeyapps.barcodescanner.DecoratedBarcodeView
+            android:id="@+id/barcode_scanner"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/medium"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/TVtitle"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
+
+========================================
+
+File: app/src/main/res/layout/progress_bar.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <androidx.cardview.widget.CardView
+        android:background="@android:color/white"
+        app:cardCornerRadius="@dimen/small"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/medium"
+            android:backgroundTint="@color/whiteColour">
+
+
+            <ProgressBar
+                android:id="@+id/progrssbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toTopOf="@id/cp_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!--
+            <androidx.core.widget.ContentLoadingProgressBar
+                android:id="@+id/progrssbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toTopOf="@id/cp_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>-->
+
+            <!--<com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottieAnimation"
+                android:layout_width="180dp"
+                android:layout_height="80dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:adjustViewBounds="true"
+                app:layout_constraintBottom_toTopOf="@id/cp_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:lottie_autoPlay="true"
+                app:lottie_fileName="loading.json"
+                app:lottie_loop="true" />-->
+
+            <TextView
+                android:id="@+id/cp_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="Please wait...."
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/progrssbar" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>
+========================================
+
+File: app/src/main/res/layout/activity_home.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".HomeActivity">
+
+        <!-- Fragment container for displaying content -->
+        <FrameLayout
+            android:id="@+id/fragmentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- BottomNavigationView as the replacement for ChipNavigationBar -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:menu="@menu/bottom_menu"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:itemIconTint="@color/colorPrimary"
+            app:itemTextColor="@color/colorPrimary"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
+
+========================================
+
+File: app/src/main/res/mipmap-xxxhdpi/ic_error_image_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxxhdpi/ic_error_image_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxxhdpi/ic_error_image.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/values/demension.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="small">8dp</dimen>
+    <dimen name="medium">16dp</dimen>
+    <dimen name="large">24dp</dimen>
+
+</resources>
+========================================
+
+File: app/src/main/res/values/styles.xml
+----------------------------------------
+<resources
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:fontFamily">@font/mavenpro_medium</item>
+        <item name="android:statusBarColor">@color/whiteColour</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="fragment_style">
+        <item name="android:background">@color/whiteColour</item>
+    </style>
+
+    <style name="title_style">
+        <item name="android:textSize">28sp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="fontFamily">@font/mavenpro_semi_bold</item>
+        <item name="android:textColor">@color/blackColour</item>
+    </style>
+
+    <style name="sub_title_style">
+        <item name="android:textSize">32sp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="fontFamily">@font/mavenpro_regular</item>
+        <item name="android:textColor">@color/blackColour</item>
+    </style>
+
+    <style name="menu_title_style">
+        <item name="android:textSize">32sp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="fontFamily">@font/mavenpro_semi_bold</item>
+        <item name="android:textColor">@color/whiteColour</item>
+    </style>
+
+    <style name="menu_card_view_style">
+        <item name="android:layout_marginTop">@dimen/medium</item>
+        <item name="android:layout_marginRight">@dimen/small</item>
+        <item name="android:layout_marginLeft">@dimen/small</item>
+        <item name="elevation">0dp</item>
+        <item name="cardCornerRadius">@dimen/small</item>
+    </style>
+
+    <style name="back_button_style">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_marginStart">@dimen/small</item>
+        <item name="android:layout_marginTop">13dp</item>
+        <item name="android:scaleType">fitXY</item>
+        <item name="android:src">@drawable/ic_arrow_left_24px</item>
+    </style>
+
+    <style name="edit_text_style">
+        <item name="android:layout_marginTop">@dimen/small</item>
+        <item name="android:layout_marginBottom">@dimen/small</item>
+        <item name="android:layout_marginLeft">@dimen/medium</item>
+        <item name="android:layout_marginRight">@dimen/medium</item>
+        <item name="android:textSize">@dimen/medium</item>
+    </style>
+
+    <style name="btn_style">
+        <item name="background">@drawable/btn_style</item>
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@color/whiteColour</item>
+        <item name="android:textSize">@dimen/medium</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+
+
+</resources>
+========================================
+
+File: app/src/main/res/values/colors.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#DE6262</color>
+    <color name="colorPrimaryDark">#DE6262</color>
+    <color name="colorAccent">#DE6262</color>
+
+
+    <color name="whiteColour">#FFFFFF</color>
+    <color name="blackColour">#000000</color>
+    <color name="redColour">#BD0000</color>
+</resources>
+========================================
+
+File: app/src/main/res/values/strings.xml
+----------------------------------------
+<resources>
+    <string name="app_name">Canteen managment admin</string>
+
+    <string name="menu">Menu</string>
+</resources>
+========================================
+
+File: app/src/main/res/values/AndroidManifest.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+</manifest>
+
+========================================
+
+File: app/src/main/res/mipmap-mdpi/ic_error_image_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-mdpi/ic_error_image_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-mdpi/ic_error_image.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-mdpi/ic_launcher.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/anim/slide_in_top.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromYDelta="-100%p"
+        android:toYDelta="0%p"
+        android:duration="400"/>
+</set>
+========================================
+
+File: app/src/main/res/anim/slide_out_bottom.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromYDelta="0%p"
+        android:toYDelta="100%p"
+        android:duration="400"/>
+</set>
+========================================
+
+File: app/src/main/res/anim/slide_in_bottom.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromYDelta="100%p"
+        android:toYDelta="0%p"
+        android:duration="400"/>
+</set>
+========================================
+
+File: app/src/main/res/anim/slide_out_top.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromYDelta="0%p"
+        android:toYDelta="-100%p"
+        android:duration="400"/>
+</set>
+========================================
+
+File: app/src/main/res/mipmap-xhdpi/ic_error_image_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xhdpi/ic_error_image_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xhdpi/ic_error_image.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xhdpi/ic_launcher.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxhdpi/ic_error_image_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxhdpi/ic_error_image_round.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxhdpi/ic_error_image.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png
+----------------------------------------
+Error reading file: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte
+
+========================================
+
+File: app/src/debug/google-services.json
+----------------------------------------
+{
+  "project_info": {
+    "project_number": "375112624309",
+    "firebase_url": "https://canteen-management-b428e.firebaseio.com",
+    "project_id": "canteen-management-b428e",
+    "storage_bucket": "canteen-management-b428e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375112624309:android:c2770501c69c8c4f4476fc",
+        "android_client_info": {
+          "package_name": "com.canteenManagment.admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375112624309-auo4ig7kf6kufmcoin6h8fmdqse9pgrc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canteenManagment.admin",
+            "certificate_hash": "97451227441e39de90fd33593794ce0a8d133531"
+          }
+        },
+        {
+          "client_id": "375112624309-ragt9207a3uasfc34ds8n88ar19gmr7e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDalEq1ahLMTLjjAWM7q2ujMUmVDOwzjxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375112624309-ragt9207a3uasfc34ds8n88ar19gmr7e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+========================================
+
+File: canteen_managment_library/consumer-rules.pro
+----------------------------------------
+
+========================================
+
+File: canteen_managment_library/.gitignore
+----------------------------------------
+/build
+========================================
+
+File: canteen_managment_library/proguard-rules.pro
+----------------------------------------
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
+
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
+
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
+========================================
+
+File: canteen_managment_library/src/test/java/com/canteenmanagment/canteen_managment_library/ExampleUnitTest.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library
+
+import org.junit.Test
+
+import org.junit.Assert.*
+
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+class ExampleUnitTest {
+    @Test
+    fun addition_isCorrect() {
+        assertEquals(4, 2 + 2)
+    }
+}
+========================================
+
+File: canteen_managment_library/src/androidTest/java/com/canteenmanagment/canteen_managment_library/ExampleInstrumentedTest.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library
+
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import org.junit.Assert.*
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+@RunWith(AndroidJUnit4::class)
+class ExampleInstrumentedTest {
+    @Test
+    fun useAppContext() {
+        // Context of the app under test.
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals("com.canteenmanagment.canteen_managment_library.test", appContext.packageName)
+    }
+}
+========================================
+
+File: canteen_managment_library/src/main/AndroidManifest.xml
+----------------------------------------
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+</manifest>
+========================================
+
+File: canteen_managment_library/src/main/java/com/canteenmanagment/canteen_managment_library/models/Food.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library.models
+
+import java.io.Serializable
+
+data class Food(
+    var id : String?,
+    var name : String?,
+    var price : Int?,
+    var imageurl : String?,
+    var counterNumber : Int?,
+    var category : String?,
+    var available : Boolean,
+    var availableTimes : List<String>?
+) : Serializable {
+
+    constructor() : this(null,null,null, null,null,null,false,null)
+
+    companion object{
+
+        fun getMapFromFood(food : Food): MutableMap<String, Any> {
+
+            var map = mutableMapOf<String,Any>()
+
+            map[ID] = food.id?:"default id"
+            map[NAME] = food.name?:"default name"
+            map[PRICE] = food.price?:0
+            map[IMAGE_URL] = food.imageurl?:"default url"
+            map[COUNTER_NUMBER] = food.counterNumber?:0
+            map[AVAILABLE] = food.available
+            map[CATEGORY] = food.category?:"default category"
+            map[AVAILABLE_TIMES] = food.availableTimes?: emptyList<String>()
+
+            return map
+        }
+
+        fun getFoodFromDocumentSnapShot(map : MutableMap<String,Any>) : Food{
+
+            return Food(
+                id = map[ID] as String?,
+                name = map[NAME] as String?,
+                price = (map[PRICE] as Long).toInt(),
+                counterNumber = (map[COUNTER_NUMBER] as Long).toInt(),
+                imageurl = map[IMAGE_URL] as String?,
+                category = map[CATEGORY] as String?,
+                available = map[AVAILABLE] as Boolean,
+                availableTimes = (map[AVAILABLE_TIMES]?: emptyList<String>()) as List<String>
+            )
+
+        }
+
+
+        const val ID = "id"
+        const val NAME = "name"
+        const val PRICE = "price"
+        const val IMAGE_URL = "imageurl"
+        const val COUNTER_NUMBER = "counterNumber"
+        const val CATEGORY = "Category"
+        const val AVAILABLE = "available"
+        const val AVAILABLE_TIMES = "availableTimes"
+    }
+
+
+
+    enum class Category(val value : String) {
+        SNACKS("Snacks"),
+        FIX_THALI("Fix Thali"),
+        DRINKS("Drinks"),
+        PUNJABI_MEAL("Punjabi Meal")
+    }
+
+}
+
+========================================
+
+File: canteen_managment_library/src/main/java/com/canteenmanagment/canteen_managment_library/models/CartFood.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library.models
+
+import java.io.Serializable
+
+data class CartFood(
+    var quantity : Int,
+    var food : Food
+) : Serializable {
+
+    companion object{
+        fun getCartFoodFromMap(map : MutableMap<String,Any>) : CartFood{
+            return CartFood(
+                quantity = (map["quantity"] as Long).toInt(),
+                food =  Food.getFoodFromDocumentSnapShot(map["food"] as MutableMap<String,Any>)
+            )
+        }
+
+        fun getListFromListMap(list : List<Any>) : MutableList<CartFood>{
+
+            var cartFoodList : MutableList<CartFood> = mutableListOf()
+
+            for(item in list)
+                cartFoodList.add(getCartFoodFromMap(item as MutableMap<String, Any>))
+
+            return cartFoodList
+        }
+    }
+
+
+}
+========================================
+
+File: canteen_managment_library/src/main/java/com/canteenmanagment/canteen_managment_library/models/Order.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library.models
+
+import java.io.Serializable
+
+data class Order(
+    var id: String?,
+    var foodList: MutableList<CartFood>?,
+    var status: String?,
+    var uId: String?,
+    var time: Long?,
+    var transactionId : String?
+) : Serializable {
+
+    constructor() : this(null,null,null,null,null,null)
+
+    companion object{
+        fun getMapFromOrder(order: Order) : MutableMap<String,Any> {
+
+            val map = mutableMapOf<String,Any>()
+
+            map[ID] = order.id?:""
+            map[FOOD_LIST] = order.foodList?: mutableListOf<CartFood>()
+            map[STATUS] = order.status?:""
+            map[UID] = order.uId?:""
+            map[TIME] = order.time?:0
+            map[TRANSACTION_ID] = order.transactionId?:""
+            return map
+        }
+
+        fun getOrderFromDocumentSnapShot(map : MutableMap<String,Any>) : Order{
+
+            return Order(
+                id = map[ID] as String,
+                foodList = CartFood.getListFromListMap(map[FOOD_LIST] as List<Any>),
+                status = map[STATUS] as String,
+                uId = map[UID] as String,
+                time = map[TIME] as Long,
+                transactionId = map[TRANSACTION_ID] as String
+            )
+        }
+
+        const val ID = "id"
+        const val FOOD_LIST = "foodList"
+        const val STATUS = "status"
+        const val UID = "uId"
+        const val TIME = "time"
+        const val TRANSACTION_ID = "transactionId"
+    }
+
+    enum class Status(var value: String) {
+        SUCCESS("Success"),
+        READY("Ready"),
+        INPROGRESS("In Progress")
+    }
+
+}
+========================================
+
+File: canteen_managment_library/src/main/java/com/canteenmanagment/canteen_managment_library/apiManager/CustomeResult.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library.apiManager
+
+class CustomeResult(var isSuccess : Boolean = false, var message : String = "", var data : Any? = null)
+
+========================================
+
+File: canteen_managment_library/src/main/java/com/canteenmanagment/canteen_managment_library/apiManager/FirebaseApiManager.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library.apiManager
+
+import android.net.Uri
+import com.canteenmanagment.canteen_managment_library.models.CartFood
+import com.canteenmanagment.canteen_managment_library.models.Food
+import com.canteenmanagment.canteen_managment_library.models.Order
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.util.*
+import kotlin.collections.HashMap
+
+object FirebaseApiManager {
+
+    private val DB = FirebaseFirestore.getInstance()
+    private val uid = FirebaseAuth.getInstance().uid
+//    private val uid = "TrtfkHPfrUSK8kkaNWnXbL0DBzK2"
+
+    suspend fun storeFoodData(food: Food): CustomeResult {
+        return withContext(Dispatchers.IO) {
+
+            val foodDR = DB.collection(BaseUrl.FOOD).document()
+
+            food.id = foodDR.id
+            var map = Food.getMapFromFood(food)
+
+            var result = CustomeResult()
+
+            foodDR.set(map).addOnCompleteListener {
+                result.isSuccess = true
+                result.message = "Food Added Successfully"
+            }.addOnFailureListener {
+                result.isSuccess = false
+                result.message = it.message ?: "Error"
+            }.await()
+
+            return@withContext result
+        }
+    }
+
+    suspend fun updateFoodData(food: Food): CustomeResult {
+        return withContext(Dispatchers.IO) {
+
+            val foodDR = food.id?.let { DB.collection(BaseUrl.FOOD).document(it) }
+
+
+            var map = Food.getMapFromFood(food)
+
+            var result = CustomeResult()
+
+            foodDR?.set(map)?.addOnCompleteListener {
+                result.isSuccess = true
+                result.message = "Food Update Successfully"
+            }?.addOnFailureListener {
+                result.isSuccess = false
+                result.message = it.message ?: "Error"
+            }?.await()
+
+            return@withContext result
+        }
+    }
+
+    suspend fun deleteFoodData(food: Food): CustomeResult {
+        return withContext(Dispatchers.IO) {
+
+            val foodDR = food.id?.let { DB.collection(BaseUrl.FOOD).document(it) }
+
+            var result = CustomeResult()
+
+            foodDR?.delete()?.addOnCompleteListener {
+                result.isSuccess = true
+                result.message = "Food Delete Successfully"
+            }?.addOnFailureListener {
+                result.isSuccess = false
+                result.message = it.message ?: "Error"
+            }?.await()
+
+            return@withContext result
+        }
+    }
+
+
+    suspend fun getAllFoodFromCategory(category: String): List<Food> {
+        val foodDR = DB.collection(BaseUrl.FOOD)
+
+        var result: CustomeResult = CustomeResult()
+
+        var snapshot = foodDR.whereEqualTo(Food.CATEGORY, category).get().addOnSuccessListener {
+            result.isSuccess = true
+        }.addOnFailureListener {
+            result.isSuccess = false
+            result.message = it.message.toString()
+        }.await()
+
+        var b = snapshot.documents.map {
+            Food.getFoodFromDocumentSnapShot(it.data!!)
+        }
+
+        return b
+
+    }
+
+    suspend fun uploadFile(
+            fileURI: Uri,
+            fileName: String,
+            uploadPath: String
+    ): CustomeResult {
+        var result: CustomeResult = CustomeResult()
+        return withContext(Dispatchers.IO) {
+            try {
+
+                var downloadUrl: String? = null
+
+                val reference: StorageReference? =
+                        FirebaseStorage.getInstance().getReference(uploadPath)
+
+                val mref = reference!!.child(fileName)
+
+                mref.putFile(fileURI).await()
+
+                mref.downloadUrl.addOnCompleteListener { task ->
+                    downloadUrl = task.result.toString()
+                }.addOnFailureListener {
+                    result.message = it.message.toString()
+                }.await()
+
+                if (downloadUrl != null) {
+                    result.isSuccess = true
+                    result.data = downloadUrl
+                    result
+                } else {
+                    result.isSuccess = false
+                    result
+                }
+
+            } catch (e: Exception) {
+                result.isSuccess = false
+                result.message = e.message.toString()
+                result
+            }
+        }
+
+    }
+
+    suspend fun placeOrderInSystem(
+            foodList: MutableList<CartFood>,
+            transactionID: String
+    ): CustomeResult {
+
+        val result: CustomeResult = CustomeResult()
+        return withContext(Dispatchers.IO) {
+            try {
+                val orderDR = DB.collection(BaseUrl.ORDER).document()
+                val order = Order()
+                order.id = orderDR.id
+                order.foodList = foodList
+                order.status = Order.Status.INPROGRESS.value
+                order.uId = uid
+                order.time = Date().time
+                order.transactionId = transactionID
+
+                orderDR.set(Order.getMapFromOrder(order)).addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+                result
+            } catch (e: Exception) {
+                result.isSuccess = false
+                result.message = e.message.toString()
+                result
+            }
+        }
+    }
+
+    /*suspend fun placeOrderWithPendingPayment(){
+    }
+
+    suspend fun setTransactionIdToOrder(){
+    }
+
+    suspend fun deleteOrderFromID(){
+    }*/
+
+    suspend fun getInProgressOrder(): CustomeResult {
+        val orderDR = DB.collection(BaseUrl.ORDER)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot = orderDR.whereEqualTo(Order.UID, uid)
+                .whereEqualTo(Order.STATUS, Order.Status.INPROGRESS.value)
+                .orderBy(Order.TIME, Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+        if (result.isSuccess)
+            result.data = snapshot.documents.map {
+                Order.getOrderFromDocumentSnapShot(it.data!!)
+            }
+
+        return result
+    }
+
+    suspend fun getReadyOrder(): CustomeResult {
+        val orderDR = DB.collection(BaseUrl.ORDER)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot = orderDR.whereEqualTo(Order.UID, uid)
+                .whereEqualTo(Order.STATUS, Order.Status.READY.value)
+                .orderBy(Order.TIME, Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+        if (result.isSuccess)
+            result.data = snapshot.documents.map {
+                Order.getOrderFromDocumentSnapShot(it.data!!)
+            }
+
+        return result
+    }
+
+    suspend fun getAllPastOrders(): CustomeResult {
+        val orderDR = DB.collection(BaseUrl.ORDER)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot = orderDR.whereEqualTo(Order.UID, uid)
+                .whereEqualTo(Order.STATUS, Order.Status.SUCCESS.value)
+                .orderBy(Order.TIME, Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+        if (result.isSuccess)
+            result.data = snapshot.documents.map {
+                Order.getOrderFromDocumentSnapShot(it.data!!)
+            }
+        return result
+
+    }
+
+    suspend fun getAllFavouriteFoods(): CustomeResult {
+
+        val foodDR = DB.collection(BaseUrl.USER).document(uid!!).collection(BaseUrl.FAVOURITE)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot = foodDR.get().addOnSuccessListener {
+            result.isSuccess = true
+        }.addOnFailureListener {
+            result.isSuccess = false
+            result.message = it.message.toString()
+        }.await()
+
+        if (result.isSuccess)
+            result.data = snapshot.documents.map {
+                Food.getFoodFromDocumentSnapShot(it.data!!)
+            }
+
+        return result
+    }
+
+    suspend fun addFoodToFavourite(food: Food): CustomeResult {
+        return withContext(Dispatchers.IO) {
+
+            val favFoodDR =
+                    DB.collection(BaseUrl.USER).document(uid!!).collection(BaseUrl.FAVOURITE)
+                            .document(food.id!!)
+
+            val map = Food.getMapFromFood(food)
+
+            val result = CustomeResult()
+
+            favFoodDR.set(map).addOnCompleteListener {
+                result.isSuccess = true
+                result.message = "Food Added Successfully"
+            }.addOnFailureListener {
+                result.isSuccess = false
+                result.message = it.message ?: "Error"
+            }.await()
+
+            return@withContext result
+        }
+    }
+
+    suspend fun removeFoodFromFavourite(food: Food): CustomeResult {
+
+        return withContext(Dispatchers.IO) {
+
+            val favFoodDR =
+                    DB.collection(BaseUrl.USER).document(uid!!).collection(BaseUrl.FAVOURITE)
+                            .document(food.id!!)
+
+            var result = CustomeResult()
+
+            favFoodDR.delete().addOnCompleteListener {
+                result.isSuccess = true
+                result.message = "Food Delete Successfully"
+            }.addOnFailureListener {
+                result.isSuccess = false
+                result.message = it.message ?: "Error"
+            }.await()
+
+            return@withContext result
+        }
+
+    }
+
+    suspend fun getAllPastFoods(): CustomeResult {
+
+        val ORDER_LIMIT = 5
+
+        val orderDR = DB.collection(BaseUrl.ORDER)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot = orderDR.whereEqualTo(Order.UID, uid)
+                .whereEqualTo(Order.STATUS, Order.Status.SUCCESS.value)
+                .orderBy(Order.TIME, Query.Direction.DESCENDING)
+                .limit(ORDER_LIMIT.toLong())
+                .get()
+                .addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+        if (result.isSuccess) {
+            val orderList = snapshot.documents.map {
+                Order.getOrderFromDocumentSnapShot(it.data!!)
+            }
+
+            val foodList: MutableList<Food> = mutableListOf<Food>()
+            for (order in orderList)
+                for (cartFood in order.foodList ?: listOf<CartFood>())
+                    if (foodList.indexOf(cartFood.food) == -1)
+                        foodList.add(cartFood.food)
+
+            result.data = foodList
+        }
+
+        return result
+    }
+
+    suspend fun getFoodListFromTime(timeLabel: String): CustomeResult {
+
+        val foodDR = DB.collection(BaseUrl.FOOD)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot =
+                foodDR.whereArrayContains(Food.AVAILABLE_TIMES, timeLabel)
+                        .whereEqualTo(Food.AVAILABLE, true).orderBy(Food.CATEGORY).get()
+                        .addOnSuccessListener {
+                            result.isSuccess = true
+                        }.addOnFailureListener {
+                            result.isSuccess = false
+                            result.message = it.message.toString()
+                        }.await()
+
+        if (result.isSuccess)
+            result.data = snapshot.documents.map {
+                Food.getFoodFromDocumentSnapShot(it.data!!)
+            }
+
+        return result
+    }
+
+    suspend fun getAllInProgressOrder(): CustomeResult {
+        val orderDR = DB.collection(BaseUrl.ORDER)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot = orderDR
+                .whereEqualTo(Order.STATUS, Order.Status.INPROGRESS.value)
+                .orderBy(Order.TIME, Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+        if (result.isSuccess)
+            result.data = snapshot.documents.map {
+                Order.getOrderFromDocumentSnapShot(it.data!!)
+            }
+
+        return result
+    }
+
+    suspend fun makeOrderReady(order: Order): CustomeResult {
+
+        val result: CustomeResult = CustomeResult()
+        return withContext(Dispatchers.IO) {
+            try {
+                val orderDR = DB.collection(BaseUrl.ORDER).document(order.id!!)
+
+                order.status = Order.Status.READY.value
+
+                orderDR.set(Order.getMapFromOrder(order)).addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+                result
+            } catch (e: Exception) {
+                result.isSuccess = false
+                result.message = e.message.toString()
+                result
+            }
+        }
+    }
+
+    suspend fun makeOrderSuccess(orderID: String): CustomeResult {
+
+        val result: CustomeResult = CustomeResult()
+        val orderDR = DB.collection(BaseUrl.ORDER).document(orderID)
+
+        val documentShot = orderDR.get().addOnSuccessListener {
+            result.isSuccess = true
+        }.addOnFailureListener {
+            result.isSuccess = false
+            result.message = it.message.toString()
+        }.await()
+
+        if (result.isSuccess) {
+            val order = documentShot.data?.let { Order.getOrderFromDocumentSnapShot(it) }
+
+            if (order?.status.equals(Order.Status.READY.value)) {
+                order?.status = Order.Status.SUCCESS.value
+
+                val map = Order.getMapFromOrder(order!!)
+
+                orderDR.set(map).addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+            } else {
+                result.isSuccess = false
+                result.message = "Order already given"
+            }
+
+
+        }
+        return result
+
+    }
+
+    suspend fun updateRecommendedFood() {
+
+        val orderDR = DB.collection(BaseUrl.ORDER)
+
+        val result: CustomeResult = CustomeResult()
+
+        val snapshot = orderDR
+                .orderBy(Order.TIME, Query.Direction.DESCENDING)
+                .limit(50)
+                .get()
+                .addOnSuccessListener {
+                    result.isSuccess = true
+                }.addOnFailureListener {
+                    result.isSuccess = false
+                    result.message = it.message.toString()
+                }.await()
+
+        if (result.isSuccess) {
+            result.data = snapshot.documents.map {
+                Order.getOrderFromDocumentSnapShot(it.data!!)
+            }
+
+            val orderList: List<Order> = result.data as List<Order>
+
+            val hasmap: HashMap<String, List<CartFood>> = HashMap()
+
+            for (order in orderList) {
+
+                val cartFoodList = order.foodList as MutableList<CartFood>
+
+                for (cartFood in cartFoodList) {
+
+                    val temp = mutableListOf<CartFood>()
+                    for (cartFood4 in cartFoodList)
+                        temp.add(cartFood4)
+
+                    temp.remove(cartFood)
+
+                    for (i in 0 until temp.size)
+                        temp[i].quantity = 1
+
+                    if (hasmap[cartFood.food.id!!].isNullOrEmpty()) {
+                        hasmap[cartFood.food.id!!] = temp
+                    } else {
+                        var currentFoodList = hasmap[cartFood.food.id!!]!!
+
+                        for (i in 0 until temp.size) {
+
+                            var flag = true
+                            for (j in currentFoodList.indices) {
+                                if (currentFoodList[j].food.id?.equals(temp[i].food.id) ?: false) {
+                                    currentFoodList[j].quantity++
+                                    flag = false
+                                }
+                            }
+
+                            if (flag)
+                                (hasmap[cartFood.food.id!!] as MutableList<CartFood>).add(temp[i])
+                        }
+                    }
+                }
+            }
+
+//            Log.d("Recommended",hasmap.toString())
+
+            val finalHashMap: HashMap<String, List<Food>> = HashMap()
+            for (a in hasmap) {
+
+                var sortedFoodList: MutableList<Food> = mutableListOf()
+                val sortedCartFoodList = a.value.sortedByDescending { it -> it.quantity }
+                //Log.d("Rec",sortedCartFoodList.toString())
+
+                for (cartFood in sortedCartFoodList)
+                    sortedFoodList.add(cartFood.food)
+
+                if (sortedFoodList.size > 3)
+                    sortedFoodList = sortedFoodList.subList(0, 2)
+
+                //Log.d("Rec",sortedFoodList.size.toString())
+                finalHashMap[a.key] = sortedFoodList
+
+            }
+
+            //Log.d("Recommended",finalHashMap.toString())
+
+            for (recommendedFood in finalHashMap) {
+
+                val foodCR = DB.collection(BaseUrl.FOOD).document(recommendedFood.key).collection(BaseUrl.RECOMMENDED_FOOD)
+
+
+                for (food in recommendedFood.value) {
+
+                    val map = Food.getMapFromFood(food)
+
+
+                    foodCR.document(food.id!!).set(map).addOnCompleteListener {
+                    }.addOnFailureListener {
+                    }.await()
+                }
+            }
+        }
+    }
+
+    suspend fun getRecommendedFood(foodId : String) : CustomeResult{
+        val result : CustomeResult = CustomeResult()
+
+        val foodDR = DB.collection(BaseUrl.FOOD).document(foodId).collection(BaseUrl.RECOMMENDED_FOOD)
+
+        var snapshot = foodDR.get().addOnSuccessListener {
+            result.isSuccess = true
+        }.addOnFailureListener {
+            result.isSuccess = false
+            result.message = it.message.toString()
+        }.await()
+
+        result.data = snapshot.documents.map {
+            Food.getFoodFromDocumentSnapShot(it.data!!)
+        }
+        return result
+    }
+
+    
+
+    object BaseUrl {
+        const val FOOD = "Food"
+        const val ORDER = "Order"
+        const val USER = "User"
+        const val FAVOURITE = "Favourite"
+        const val RECOMMENDED_FOOD = "Recommended Food"
+
+    }
+
+}
+
+
+
+========================================
+
+File: canteen_managment_library/src/main/java/com/canteenmanagment/canteen_managment_library/helper/helper.kt
+----------------------------------------
+package com.canteenmanagment.canteen_managment_library.helper
+
+import android.content.Context
+import android.widget.Toast
+
+fun showLongtoast(massage : String,mContext : Context){
+    Toast.makeText(mContext,massage,Toast.LENGTH_LONG).show()
+}
+
+fun showShortToast(massage : String,mContext : Context?){
+    Toast.makeText(mContext,massage,Toast.LENGTH_SHORT).show()
+}
+========================================
 
