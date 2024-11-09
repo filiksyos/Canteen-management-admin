@@ -1,7 +1,6 @@
-package com.canteenManagment.admin.ui
+package com.canteenManagment.admin.ui.Scan
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import com.canteenManagment.admin.BaseActivity.BaseActivity
 import com.canteenManagment.admin.R

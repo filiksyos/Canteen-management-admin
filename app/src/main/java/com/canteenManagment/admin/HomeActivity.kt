@@ -5,9 +5,8 @@ import androidx.fragment.app.Fragment
 import androidx.databinding.DataBindingUtil
 import com.canteenManagment.admin.BaseActivity.BaseActivity
 import com.canteenManagment.admin.ui.Fragments.Home.HomeFragment
-import com.canteenManagment.admin.ui.Fragments.MenuFragment
 import com.canteenManagment.admin.databinding.ActivityHomeBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.canteenManagment.admin.ui.Fragments.Menu.MenuFragment
 
 class HomeActivity : BaseActivity() {
 

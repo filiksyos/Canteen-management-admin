@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.view.LayoutInflater
-import com.canteenManagment.admin.R
 import com.canteenManagment.admin.databinding.DeleteCustomeDiologBinding // Ensure the generated binding import is correct
 
 class DeleteCustomDialog(private val activity: Activity) {
