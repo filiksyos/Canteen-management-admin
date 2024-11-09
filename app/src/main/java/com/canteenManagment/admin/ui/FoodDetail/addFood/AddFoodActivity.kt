@@ -72,47 +72,44 @@ class AddFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickLi
 
     // Function to add a new food item to the database
     private fun addFood() {
-        progressDialog.startDialog() // Show progress dialog during data upload
+        progressDialog.startDialog()
 
         scope.launch {
-            // Upload image and get the URL, then create and store food item data
             uploadImage().let { uploadResult ->
-                progressDialog.stopDiaolog() // Stop dialog after image upload
+                progressDialog.stopDiaolog()
 
                 if (uploadResult.isSuccess) {
-                    // Create new Food item with user-entered data
+                    val uploadedImageUrl = uploadResult.data.toString()  // Use the URL directly from uploadResult
+                    Log.d("AddFoodActivity", "Image uploaded successfully, URL: $uploadedImageUrl")
+
                     val food = Food().apply {
                         name = binding.ETname.text.toString().trim()
                         price = binding.ETPrice.text.toString().trim().toInt()
                         counterNumber = binding.SPCounterNumber.selectedItemPosition + 1
                         category = intent.getStringExtra(CATEGORY_NAME)
                         available = true
-                        imageurl = uploadResult.data.toString() // Assign uploaded image URL
-                        availableTimes = getSelectedChip() // Get availability times
+                        imageurl = uploadedImageUrl  // Ensure this is the full URL
+                        availableTimes = getSelectedChip()
                     }
-                    Log.d("AvailableTimes", food.availableTimes.toString())
 
-                    progressDialog.startDialog() // Show progress dialog for data storage
+                    progressDialog.startDialog()
 
-                    scope.launch {
-                        // Store food data in Firebase and show feedback to the user
-                        FirebaseApiManager.storeFoodData(food).let {
-                            progressDialog.stopDiaolog() // Stop progress dialog
+                    FirebaseApiManager.storeFoodData(food).let { storeResult ->
+                        progressDialog.stopDiaolog()
+                        Log.d("AddFoodActivity", "Store result: ${storeResult.message}")
 
-                            when (it.isSuccess) {
-                                true -> {
-                                    showShortToast(it.message, mContext) // Show success message
-                                    setResult(DATA_CHANGE) // Set result for data change
-                                    super.onBackPressed() // Return to previous screen
-                                    overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom)
-                                }
-                                false -> showShortToast(it.message, mContext) // Show error message
-                            }
+                        if (storeResult.isSuccess) {
+                            showShortToast(storeResult.message, mContext)
+                            setResult(DATA_CHANGE)
+                            super.onBackPressed()
+                            overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom)
+                        } else {
+                            showShortToast(storeResult.message, mContext)
                         }
                     }
                 } else {
-                    // Show error message if image upload fails
                     showShortToast(uploadResult.message, mContext)
+                    Log.e("AddFoodActivity", "Image upload failed: ${uploadResult.message}")
                 }
             }
         }
@@ -124,19 +121,27 @@ class AddFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickLi
             val cr = contentResolver
             val mime = MimeTypeMap.getSingleton()
 
-            // Generate a unique filename using the food name and MIME type
-            val filename = "${binding.ETname.text.toString().trim()}.${mime.getExtensionFromMimeType(imageUri?.let { cr.getType(it) })}"
+            // Generate file extension, default to "jpg" if MIME type is not found
+            val fileExtension = mime.getExtensionFromMimeType(imageUri?.let { cr.getType(it) }) ?: "jpg"
+            val filename = "${binding.ETname.text.toString().trim()}.$fileExtension"  // Filename only, e.g., "hffy.jpg"
 
-            // Upload image to Firebase and return the result
+            // Log the upload details for debugging
+            Log.d("FirebaseStorage", "Uploading to path: ${FirebaseApiManager.BaseUrl.FOOD}")
+            Log.d("FirebaseStorage", "Image URI: $imageUri")
+            Log.d("FirebaseStorage", "Generated Filename: $filename")
+
+            // Upload image to Firebase Storage under "Food" folder only
             return FirebaseApiManager.uploadFile(
                 imageUri!!,
                 filename,
-                FirebaseApiManager.BaseUrl.FOOD + "/" + binding.ETname.text.toString().trim()
+                FirebaseApiManager.BaseUrl.FOOD  // Upload to "Food" folder only
             )
         } else {
-            return CustomeResult(false, "Please Select image") // Return error if no image selected
+            Log.e("FirebaseStorage", "Image URI is null; please select an image.")
+            return CustomeResult(false, "Please select an image") // Return error if no image selected
         }
     }
+
 
     // Function to open an intent for image selection
     private fun chooseImage() {

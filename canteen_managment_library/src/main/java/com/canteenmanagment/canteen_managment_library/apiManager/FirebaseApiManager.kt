@@ -1,6 +1,7 @@
 package com.canteenmanagment.canteen_managment_library.apiManager
 
 import android.net.Uri
+import android.util.Log
 import com.canteenmanagment.canteen_managment_library.models.CartFood
 import com.canteenmanagment.canteen_managment_library.models.Food
 import com.canteenmanagment.canteen_managment_library.models.Order
@@ -88,64 +89,76 @@ object FirebaseApiManager {
     suspend fun getAllFoodFromCategory(category: String): List<Food> {
         val foodDR = DB.collection(BaseUrl.FOOD)
 
-        var result: CustomeResult = CustomeResult()
+        val result = CustomeResult()
 
-        var snapshot = foodDR.whereEqualTo(Food.CATEGORY, category).get().addOnSuccessListener {
-            result.isSuccess = true
-        }.addOnFailureListener {
-            result.isSuccess = false
-            result.message = it.message.toString()
-        }.await()
+        Log.d("CategoryQuery", "Querying foods with category: $category") // Log the category parameter
 
-        var b = snapshot.documents.map {
-            Food.getFoodFromDocumentSnapShot(it.data!!)
-        }
-
-        return b
-
-    }
-
-    suspend fun uploadFile(
-            fileURI: Uri,
-            fileName: String,
-            uploadPath: String
-    ): CustomeResult {
-        var result: CustomeResult = CustomeResult()
-        return withContext(Dispatchers.IO) {
-            try {
-
-                var downloadUrl: String? = null
-
-                val reference: StorageReference? =
-                        FirebaseStorage.getInstance().getReference(uploadPath)
-
-                val mref = reference!!.child(fileName)
-
-                mref.putFile(fileURI).await()
-
-                mref.downloadUrl.addOnCompleteListener { task ->
-                    downloadUrl = task.result.toString()
-                }.addOnFailureListener {
-                    result.message = it.message.toString()
-                }.await()
-
-                if (downloadUrl != null) {
-                    result.isSuccess = true
-                    result.data = downloadUrl
-                    result
-                } else {
-                    result.isSuccess = false
-                    result
-                }
-
-            } catch (e: Exception) {
+        // Execute Firestore query to fetch documents where the category matches
+        val snapshot = foodDR.whereEqualTo(Food.CATEGORY, category)
+            .get()
+            .addOnSuccessListener { documents ->
+                result.isSuccess = true
+                Log.d("FirestoreSnapshot", "Documents found: ${documents.size()}") // Log the number of documents
+            }
+            .addOnFailureListener { exception ->
                 result.isSuccess = false
-                result.message = e.message.toString()
-                result
+                result.message = exception.message.toString()
+                Log.e("FirestoreError", "Error fetching foods: ${exception.message}") // Log any error
+            }
+            .await()
+
+        // Map Firestore documents to Food objects
+        val foodList = snapshot.documents.mapNotNull {
+            try {
+                Food.getFoodFromDocumentSnapShot(it.data!!)
+            } catch (e: Exception) {
+                Log.e("DataMappingError", "Error mapping document to Food object: ${e.message}")
+                null // Skip documents that cause mapping issues
             }
         }
 
+        // Log the fetched food items for debugging
+        Log.d("FoodList", "Fetched food items: $foodList")
+
+        return foodList
     }
+
+
+    suspend fun uploadFile(
+        fileURI: Uri,
+        fileName: String,
+        uploadPath: String
+    ): CustomeResult {
+        val result = CustomeResult()
+        return withContext(Dispatchers.IO) {
+            try {
+                // Ensure the Storage reference is correct
+                val reference = FirebaseStorage.getInstance().getReference(uploadPath).child(fileName)
+
+                Log.d("FirebaseStorage", "Starting upload to path: $uploadPath/$fileName with URI: $fileURI")
+
+                // Upload the file to Firebase Storage
+                reference.putFile(fileURI).await()
+
+                // Retrieve the download URL after upload completes
+                val downloadUrl = reference.downloadUrl.await()
+                Log.d("FirebaseStorage", "File uploaded successfully. Download URL: $downloadUrl")
+
+                // Populate result with success data
+                result.isSuccess = true
+                result.data = downloadUrl.toString()
+                result
+
+            } catch (e: Exception) {
+                // Log the exception and set the failure message
+                Log.e("FirebaseStorage", "File upload failed: ${e.message}")
+                result.isSuccess = false
+                result.message = e.message ?: "Unknown error during upload"
+                result
+            }
+        }
+    }
+
 
     suspend fun placeOrderInSystem(
             foodList: MutableList<CartFood>,
