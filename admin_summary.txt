@@ -33,6 +33,58 @@ File: app/.gitignore
 /build
 ========================================
 
+File: app/google-services.json
+----------------------------------------
+{
+  "project_info": {
+    "project_number": "761337411544",
+    "project_id": "canteen-management-8272d",
+    "storage_bucket": "canteen-management-8272d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:761337411544:android:2ef01721936cba1e9564ad",
+        "android_client_info": {
+          "package_name": "com.canteenManagment.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbRPsV2Xr0dcyJ2ukiI69rYYrKdczjiFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:761337411544:android:56868278d46ce09a9564ad",
+        "android_client_info": {
+          "package_name": "com.canteenmanagment"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbRPsV2Xr0dcyJ2ukiI69rYYrKdczjiFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+========================================
+
 File: app/proguard-rules.pro
 ----------------------------------------
 # Add project specific ProGuard rules here.
@@ -120,9 +172,11 @@ File: app/src/main/AndroidManifest.xml
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA"
         tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+
 
     <application
         android:allowBackup="true"
@@ -131,7 +185,7 @@ File: app/src/main/AndroidManifest.xml
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.ScanActivity"></activity>
+        <activity android:name=".ui.Scan.ScanActivity"></activity>
         <activity android:name=".ui.FoodDetail.editFood.EditFoodActivity" />
         <activity android:name=".ui.FoodDetail.addFood.AddFoodActivity" />
         <activity android:name=".ui.FoodDetail.listFood.FoodListActivity" />
@@ -164,9 +218,8 @@ import androidx.fragment.app.Fragment
 import androidx.databinding.DataBindingUtil
 import com.canteenManagment.admin.BaseActivity.BaseActivity
 import com.canteenManagment.admin.ui.Fragments.Home.HomeFragment
-import com.canteenManagment.admin.ui.Fragments.MenuFragment
 import com.canteenManagment.admin.databinding.ActivityHomeBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.canteenManagment.admin.ui.Fragments.Menu.MenuFragment
 
 class HomeActivity : BaseActivity() {
 
@@ -201,12 +254,293 @@ class HomeActivity : BaseActivity() {
 
 ========================================
 
-File: app/src/main/java/com/canteenManagment/admin/ui/ScanActivity.kt
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Profile/ProfileFragment.kt
 ----------------------------------------
-package com.canteenManagment.admin.ui
+package com.canteenManagment.admin.ui.Fragments.Profile
 
 import android.os.Bundle
-import android.widget.Toast
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import com.canteenManagment.admin.R
+
+
+class ProfileFragment : Fragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_profile, container, false)
+    }
+
+}
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Home/PrepareOrderListRecyclerViewAdapter.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Fragments.Home
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.ItemFoodListLayoutBinding
+import com.canteenManagment.admin.databinding.ItemPreparingFoodListLayoutBinding
+import com.canteenmanagment.canteen_managment_library.models.Food
+import com.canteenmanagment.canteen_managment_library.models.Order
+
+// Adapter to display a list of in-progress orders in a RecyclerView, allowing the user to mark orders as ready
+class PrepareOrderListRecyclerViewAdapter(
+    val orderList: List<Order>, // List of orders to display
+    val makeOrderReady: (order: Order) -> Unit // Lambda function to mark an order as ready
+) : RecyclerView.Adapter<PrepareOrderListRecyclerViewAdapter.ViewHolder>() {
+
+    // Inflates the item layout and returns a ViewHolder with the binding
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = ItemPreparingFoodListLayoutBinding.inflate(layoutInflater, parent, false)
+        return ViewHolder(binding)
+    }
+
+    // Binds data for each order item to the corresponding views in the ViewHolder
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val order = orderList[position]
+
+        // Display the Order ID
+        holder.binding.TVOrderId.text = "Order ID : ${order.id}"
+
+        // Build and display a list of food items and their quantities for this order
+        val foodList = StringBuilder()
+        for (cartFood in order.foodList!!) {
+            foodList.append("${cartFood.food.name} X ${cartFood.quantity}\n")
+        }
+        holder.binding.TVFoodItems.text = foodList.toString()
+
+        // Set up click listener to mark the order as ready
+        holder.binding.BTReady.setOnClickListener {
+            makeOrderReady(order) // Call the lambda function with the selected order
+        }
+    }
+
+    // Returns the total count of items in the order list
+    override fun getItemCount(): Int {
+        return orderList.size
+    }
+
+    // ViewHolder class that holds references to the views in each item layout
+    class ViewHolder(var binding: ItemPreparingFoodListLayoutBinding) : RecyclerView.ViewHolder(binding.root)
+}
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Home/HomeFragment.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Fragments.Home
+
+import android.app.Activity
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import com.canteenManagment.admin.databinding.FragmentHomeBinding
+import com.canteenManagment.admin.helper.CustomProgressBar
+import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
+import com.canteenmanagment.canteen_managment_library.models.Order
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+class HomeFragment : Fragment() {
+
+    // View binding property to access layout views
+    private var _binding: FragmentHomeBinding? = null
+    // Safe non-null access to binding (only valid between onCreateView and onDestroyView)
+    private val binding get() = _binding!!
+
+    // Coroutine scope to handle background tasks on the main thread
+    val scope = CoroutineScope(Dispatchers.Main)
+
+    // List to store in-progress orders from Firebase
+    private lateinit var orderList: MutableList<Order>
+
+    // Custom progress dialog to indicate loading state
+    private lateinit var progressDialog: CustomProgressBar
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+
+        // Initialize view binding with the fragment's layout
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        // Initialize the custom progress dialog
+        progressDialog = CustomProgressBar(activity as Activity)
+
+        // Load and display data in the RecyclerView
+        loadData()
+
+        return binding.root // Return the root view of the binding layout
+    }
+
+    // Function to load data from Firebase and display in the RecyclerView
+    private fun loadData() {
+        progressDialog.startDialog() // Show loading indicator
+        scope.launch {
+            // Fetch all in-progress orders from Firebase
+            FirebaseApiManager.getAllInProgressOrder().let {
+                progressDialog.stopDiaolog() // Hide loading indicator
+                if (it.isSuccess) {
+                    // Set orderList with fetched data and update RecyclerView adapter
+                    orderList = it.data as MutableList<Order>
+                    binding.OrderRecyclerView.adapter = PrepareOrderListRecyclerViewAdapter(orderList) { order ->
+                        makeOrderReady(order)
+                    }
+                }
+            }
+        }
+    }
+
+    // Function to update an order status to "ready" and refresh the RecyclerView
+    private fun makeOrderReady(order: Order) {
+        progressDialog.startDialog() // Show loading indicator
+        scope.launch {
+            // Mark order as ready in Firebase
+            FirebaseApiManager.makeOrderReady(order).let {
+                progressDialog.stopDiaolog() // Hide loading indicator
+                if (it.isSuccess) {
+                    // Remove the completed order from the list
+                    orderList.remove(order)
+                    // Update the RecyclerView with the updated order list
+                    binding.OrderRecyclerView.adapter = PrepareOrderListRecyclerViewAdapter(orderList) { order ->
+                        makeOrderReady(order)
+                    }
+                }
+            }
+        }
+    }
+
+    // Clean up view binding reference to avoid memory leaks
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+}
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Menu/MenuFragment.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Fragments.Menu
+
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.app.ActivityOptionsCompat
+import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity
+import com.canteenManagment.admin.R
+import com.canteenManagment.admin.databinding.FragmentMenuBinding
+import com.canteenmanagment.canteen_managment_library.models.Food
+
+// Fragment to display menu categories and handle navigation to category-specific food lists
+class MenuFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
+
+    // Binding for safe access to layout views
+    private var _binding: FragmentMenuBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+
+        // Inflate the layout and initialize binding
+        _binding = FragmentMenuBinding.inflate(inflater, container, false)
+
+        // Bind category names to layout views for display
+        binding.snacks = Food.Category.SNACKS.value
+        binding.fixThali = Food.Category.FIX_THALI.value
+        binding.drinks = Food.Category.DRINKS.value
+        binding.punjabiMeal = Food.Category.PUNJABI_MEAL.value
+
+        // Set up click listeners for each category card
+        binding.CL1.setOnClickListener(this)
+        binding.CL2.setOnClickListener(this)
+        binding.CL3.setOnClickListener(this)
+        binding.CL4.setOnClickListener(this)
+
+        // Set up long click listeners for additional options if needed
+        binding.CL1.setOnLongClickListener(this)
+        binding.CL2.setOnLongClickListener(this)
+        binding.CL3.setOnLongClickListener(this)
+        binding.CL4.setOnLongClickListener(this)
+
+        return binding.root // Return the root view of the binding layout
+    }
+
+    // Handle click events to navigate to FoodListActivity with selected category
+    override fun onClick(v: View?) {
+        val intent = Intent(activity?.applicationContext, FoodListActivity::class.java)
+        var options: ActivityOptionsCompat? = null
+
+        // Determine the category selected and set up transition animation
+        when (v?.id) {
+            R.id.CL1 -> {
+                intent.putExtra(CATEGORY_NAME, Food.Category.SNACKS.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL1, "open_transition")
+            }
+            R.id.CL2 -> {
+                intent.putExtra(CATEGORY_NAME, Food.Category.FIX_THALI.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL2, "open_transition")
+            }
+            R.id.CL3 -> {
+                intent.putExtra(CATEGORY_NAME, Food.Category.DRINKS.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL3, "open_transition")
+            }
+            R.id.CL4 -> {
+                intent.putExtra(CATEGORY_NAME, Food.Category.PUNJABI_MEAL.value)
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL4, "open_transition")
+            }
+        }
+
+        // Start FoodListActivity with the selected category and transition options
+        startActivity(intent, options?.toBundle())
+    }
+
+    // Handle long-click events; here returns true to signal long-click is handled
+    override fun onLongClick(v: View?): Boolean {
+        return true
+    }
+
+    // Clean up binding reference to avoid memory leaks
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+
+    companion object {
+        // Key for passing category name to FoodListActivity
+        const val CATEGORY_NAME = "TITLE_NAME"
+    }
+}
+
+========================================
+
+File: app/src/main/java/com/canteenManagment/admin/ui/Scan/ScanActivity.kt
+----------------------------------------
+package com.canteenManagment.admin.ui.Scan
+
+import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import com.canteenManagment.admin.BaseActivity.BaseActivity
 import com.canteenManagment.admin.R
@@ -283,278 +617,6 @@ class ScanActivity : BaseActivity() {
 
 ========================================
 
-File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/ProfileFragment.kt
-----------------------------------------
-package com.canteenManagment.admin.ui.Fragments
-
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.canteenManagment.admin.R
-
-
-class ProfileFragment : Fragment() {
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false)
-    }
-
-}
-========================================
-
-File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/MenuFragment.kt
-----------------------------------------
-package com.canteenManagment.admin.ui.Fragments
-
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.app.ActivityOptionsCompat
-import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity
-import com.canteenManagment.admin.R
-import com.canteenManagment.admin.databinding.FragmentMenuBinding
-import com.canteenmanagment.canteen_managment_library.models.Food
-
-class MenuFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
-
-    private var _binding : FragmentMenuBinding? = null
-    private val binding get() = _binding!!
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-
-        _binding = FragmentMenuBinding.inflate(inflater,container,false)
-
-
-        binding.snacks = Food.Category.SNACKS.value
-        binding.fixThali = Food.Category.FIX_THALI.value
-        binding.drinks = Food.Category.DRINKS.value
-        binding.punjabiMeal = Food.Category.PUNJABI_MEAL.value
-
-        binding.CL1.setOnClickListener(this)
-        binding.CL2.setOnClickListener(this)
-        binding.CL3.setOnClickListener(this)
-        binding.CL4.setOnClickListener(this)
-
-        binding.CL1.setOnLongClickListener(this)
-        binding.CL2.setOnLongClickListener(this)
-        binding.CL3.setOnLongClickListener(this)
-        binding.CL4.setOnLongClickListener(this)
-
-
-        return binding.root
-    }
-
-    override fun onClick(v: View?) {
-        var i = Intent(activity?.applicationContext,
-            FoodListActivity::class.java)
-        var options : ActivityOptionsCompat? = null
-        when(v?.id){
-            R.id.CL1 -> {
-                i.putExtra(CATEGORY_NAME,Food.Category.SNACKS.value)
-                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL1,"open_transition")
-            }
-            R.id.CL2 -> {
-                i.putExtra(CATEGORY_NAME,Food.Category.FIX_THALI.value)
-                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL2,"open_transition")
-            }
-            R.id.CL3 ->{
-                i.putExtra(CATEGORY_NAME,Food.Category.DRINKS.value)
-                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL3,"open_transition")
-            }
-            R.id.CL4 -> {
-                i.putExtra(CATEGORY_NAME,Food.Category.PUNJABI_MEAL.value)
-                options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity,binding.CL4,"open_transition")
-            }
-        }
-
-        startActivity(i,options?.toBundle())
-
-    }
-
-    override fun onLongClick(v: View?): Boolean {
-        return true
-    }
-
-    override fun onDestroyView() {
-        _binding = null
-        super.onDestroyView()
-    }
-
-    companion object{
-        const val CATEGORY_NAME = "TITLE_NAME"
-    }
-
-
-}
-========================================
-
-File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Home/PrepareOrderListRecyclerViewAdapter.kt
-----------------------------------------
-package com.canteenManagment.admin.ui.Fragments.Home
-
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.canteenManagment.admin.R
-import com.canteenManagment.admin.databinding.ItemFoodListLayoutBinding
-import com.canteenManagment.admin.databinding.ItemPreparingFoodListLayoutBinding
-import com.canteenmanagment.canteen_managment_library.models.Food
-import com.canteenmanagment.canteen_managment_library.models.Order
-
-class PrepareOrderListRecyclerViewAdapter(val orderList : List<Order>, val makeOrderReady : (order : Order)-> Unit) : RecyclerView.Adapter<PrepareOrderListRecyclerViewAdapter.ViewHolder>() {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = ItemPreparingFoodListLayoutBinding.inflate(layoutInflater,parent,false)
-        return ViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-
-        holder.binding.TVOrderId.text = "Order ID : ${orderList[position].id}"
-
-        var foodList : String = ""
-        for(cartFood in orderList[position].foodList!!)
-            foodList += cartFood.food.name + " X ${cartFood.quantity}\n"
-
-        holder.binding.TVFoodItems.text = foodList
-
-        holder.binding.BTReady.setOnClickListener {
-            makeOrderReady(orderList[position])
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return orderList.size
-    }
-
-    class ViewHolder(var binding: ItemPreparingFoodListLayoutBinding) : RecyclerView.ViewHolder(binding.root)
-
-
-}
-========================================
-
-File: app/src/main/java/com/canteenManagment/admin/ui/Fragments/Home/HomeFragment.kt
-----------------------------------------
-package com.canteenManagment.admin.ui.Fragments.Home
-
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.canteenManagment.admin.R
-import com.canteenManagment.admin.databinding.FragmentHomeBinding
-import com.canteenManagment.admin.databinding.FragmentMenuBinding
-import com.canteenManagment.admin.helper.CustomProgressBar
-import com.canteenManagment.admin.ui.ScanActivity
-import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
-import com.canteenmanagment.canteen_managment_library.models.Food
-import com.canteenmanagment.canteen_managment_library.models.Order
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-
-class HomeFragment : Fragment() {
-
-    private var _binding : FragmentHomeBinding? = null
-    private val binding get() = _binding!!
-    val scope = CoroutineScope(Dispatchers.Main)
-    private lateinit var orderList : MutableList<Order>
-    private lateinit var progressDialog: CustomProgressBar
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        _binding = FragmentHomeBinding.inflate(inflater,container,false)
-
-        binding.RVPrepareFoodList
-
-        progressDialog = CustomProgressBar(activity as Activity)
-        loadData()
-        //test()
-
-        binding.IMScan.setOnClickListener {
-            val intent = Intent(context,ScanActivity::class.java)
-            startActivity(intent)
-        }
-
-
-
-        return binding.root
-    }
-
-    private fun loadData(){
-        progressDialog.startDialog()
-        scope.launch {
-            FirebaseApiManager.getAllInProgressOrder().let {
-                progressDialog.stopDiaolog()
-                if(it.isSuccess){
-                    orderList = it.data as MutableList<Order>
-                    binding?.RVPrepareFoodList?.adapter = PrepareOrderListRecyclerViewAdapter(orderList as List<Order>){ order -> makeOrderReady(order) }
-                }
-            }
-        }
-    }
-
-    private fun makeOrderReady(order: Order){
-        progressDialog.startDialog()
-        scope.launch {
-            FirebaseApiManager.makeOrderReady(order).let {
-                progressDialog.stopDiaolog()
-                if(it.isSuccess){
-                    orderList.remove(order)
-                    binding.RVPrepareFoodList.adapter = PrepareOrderListRecyclerViewAdapter(orderList as List<Order>){ order -> makeOrderReady(order) }
-                }
-            }
-        }
-
-    }
-
-    private fun test(){
-        scope.launch {
-            FirebaseApiManager.getRecommendedFood("1H3uTXfutCgxsnsgBIW4")
-                .let {
-                if(it.isSuccess)
-                    Log.d("Fav",(it.data as List<Food>).toString())
-            }
-
-            //Food(id = "123",name = "test",price = 1,imageUrl = "asd",category = "cat1",available = true,availableTimes = listOf<String>(),counterNumber = 1)
-
-        }
-    }
-
-    override fun onDestroyView() {
-        _binding = null
-        super.onDestroyView()
-    }
-
-
-}
-========================================
-
 File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/addFood/CustomeSpinnerAdapter.kt
 ----------------------------------------
 package com.canteenManagment.admin.ui.FoodDetail.addFood
@@ -567,27 +629,29 @@ import android.widget.ArrayAdapter
 import com.canteenManagment.admin.R
 import com.canteenManagment.admin.databinding.ItemCustomSpinnerBinding
 
-class CustomeSpinnerAdapter(context: Context, list: List<Int>) : ArrayAdapter<Int>(context,R.layout.item_custom_spinner,list) {
+// Custom adapter for displaying integer options in a Spinner
+class CustomeSpinnerAdapter(context: Context, list: List<Int>) : ArrayAdapter<Int>(context, R.layout.item_custom_spinner, list) {
 
-
+    // Returns the view for the selected item in the Spinner
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         return initView(position, convertView, parent)
     }
 
+    // Returns the dropdown view for each item in the Spinner
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
         return initView(position, convertView, parent)
     }
 
+    // Initialize the view for each item, setting the display text
     private fun initView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val binding =
-            ItemCustomSpinnerBinding.inflate(LayoutInflater.from(context), parent, false)
-
+        // Inflate item layout using view binding
+        val binding = ItemCustomSpinnerBinding.inflate(LayoutInflater.from(context), parent, false)
+        // Set item text based on its value
         binding.TVtitle.text = getItem(position).toString()
-
         return binding.root
     }
-
 }
+
 ========================================
 
 File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/addFood/AddFoodActivity.kt
@@ -606,146 +670,138 @@ import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.canteenManagment.admin.BaseActivity.BaseActivity
-import com.canteenManagment.admin.ui.Fragments.MenuFragment.Companion.CATEGORY_NAME
 import com.canteenManagment.admin.R
 import com.canteenManagment.admin.databinding.ActivityAddFoodBinding
 import com.canteenManagment.admin.helper.CustomProgressBar
 import com.canteenManagment.admin.helper.showShortToast
 import com.canteenManagment.admin.ui.FoodDetail.listFood.FoodListActivity.Companion.DATA_CHANGE
+import com.canteenManagment.admin.ui.Fragments.Menu.MenuFragment.Companion.CATEGORY_NAME
 import com.canteenmanagment.canteen_managment_library.apiManager.CustomeResult
 import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
 import com.canteenmanagment.canteen_managment_library.models.Food
 import kotlinx.coroutines.launch
 
+// Activity to handle adding a new food item, including selecting an image, entering details, and storing data
 class AddFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickListener {
 
-    private lateinit var binding: ActivityAddFoodBinding
+    private lateinit var binding: ActivityAddFoodBinding // Binding for safe access to views
     private val mContext: Context = this
-    private val progressDialog: CustomProgressBar = CustomProgressBar(this)
-    private var imageUri: Uri? = null
+    private val progressDialog: CustomProgressBar = CustomProgressBar(this) // Progress dialog to indicate loading state
+    private var imageUri: Uri? = null // URI for storing selected food image
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(
-            this,
-            R.layout.activity_add_food
-        )
+        // Set up view binding with the layout
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_add_food)
         setContentView(binding.root)
 
+        // Set up back button and title text based on selected category
         binding.IMback.setOnClickListener(this)
         binding.TVtitle.text = "Add ${intent.getStringExtra(CATEGORY_NAME)}"
 
+        // Set up click listener for Add button to trigger addFood method
         binding.BTAdd.setOnClickListener(this)
 
+        // Set up spinner for selecting counter number with custom adapter
         binding.SPCounterNumber.adapter = CustomeSpinnerAdapter(this, listOf(1, 2, 3, 4, 5))
 
+        // Set click and long-click listeners for selecting food image
         binding.IMFoodImage.setOnClickListener(this)
         binding.IMFoodImage.setOnLongClickListener(this)
-
-
-
-
     }
 
+    // Handle click events for back button, Add button, and food image
     override fun onClick(v: View?) {
-
         when (v?.id) {
+            // Handle back button click with custom transition
             R.id.IMback -> {
                 super.onBackPressed()
-                overridePendingTransition(
-                    android.R.anim.fade_in,
-                    R.anim.slide_out_bottom
-                )
+                overridePendingTransition(android.R.anim.fade_in, R.anim.slide_out_bottom)
             }
+            // Trigger addFood method when Add button is clicked
             R.id.BT_add -> addFood()
 
+            // Open image chooser to select a food image
             R.id.IM_Food_Image -> chooseImage()
-
         }
     }
 
-
-
+    // Function to add a new food item to the database
     private fun addFood() {
-
         progressDialog.startDialog()
-        scope.launch {
-            uploadImage().let {
 
+        scope.launch {
+            uploadImage().let { uploadResult ->
                 progressDialog.stopDiaolog()
 
-                if (it.isSuccess){
+                if (uploadResult.isSuccess) {
+                    val uploadedImageUrl = uploadResult.data.toString()  // Use the URL directly from uploadResult
+                    Log.d("AddFoodActivity", "Image uploaded successfully, URL: $uploadedImageUrl")
 
-                    var food = Food()
-                    food.name = binding.ETname.text.toString().trim()
-                    food.price = binding.ETPrice.text.toString().trim().toInt()
-                    food.counterNumber = binding.SPCounterNumber.selectedItemPosition + 1
-                    food.category = intent.getStringExtra(CATEGORY_NAME)
-                    food.available = true
-                    food.imageurl = it.data.toString()
-
-                    food.availableTimes = getSelectedChip()
-                    Log.d("AvailableTimes",food.availableTimes.toString())
+                    val food = Food().apply {
+                        name = binding.ETname.text.toString().trim()
+                        price = binding.ETPrice.text.toString().trim().toInt()
+                        counterNumber = binding.SPCounterNumber.selectedItemPosition + 1
+                        category = intent.getStringExtra(CATEGORY_NAME)
+                        available = true
+                        imageurl = uploadedImageUrl  // Ensure this is the full URL
+                        availableTimes = getSelectedChip()
+                    }
 
                     progressDialog.startDialog()
 
-                    scope.launch {
+                    FirebaseApiManager.storeFoodData(food).let { storeResult ->
+                        progressDialog.stopDiaolog()
+                        Log.d("AddFoodActivity", "Store result: ${storeResult.message}")
 
-                        FirebaseApiManager.storeFoodData(food).let {
-                            progressDialog.stopDiaolog()
-                            when (it.isSuccess) {
-                                true -> {
-                                    showShortToast(it.message, mContext)
-                                    setResult(DATA_CHANGE)
-                                    super.onBackPressed()
-                                    overridePendingTransition(
-                                        R.anim.slide_in_top,
-                                        R.anim.slide_out_bottom
-                                    )
-                                }
-
-                                false -> showShortToast(it.message, mContext)
-                            }
+                        if (storeResult.isSuccess) {
+                            showShortToast(storeResult.message, mContext)
+                            setResult(DATA_CHANGE)
+                            super.onBackPressed()
+                            overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom)
+                        } else {
+                            showShortToast(storeResult.message, mContext)
                         }
                     }
+                } else {
+                    showShortToast(uploadResult.message, mContext)
+                    Log.e("AddFoodActivity", "Image upload failed: ${uploadResult.message}")
                 }
-
-                else
-                    showShortToast(it.message,mContext)
             }
-
         }
-
-
     }
 
-    private suspend fun uploadImage() : CustomeResult {
+    // Function to upload the selected image to Firebase and return the result
+    private suspend fun uploadImage(): CustomeResult {
         if (imageUri != null) {
-
             val cr = contentResolver
-            val mine = MimeTypeMap.getSingleton()
+            val mime = MimeTypeMap.getSingleton()
 
-            var filename = binding.ETname.text.toString()
-                .trim() + "." + mine.getExtensionFromMimeType(imageUri?.let { cr.getType(it) })
+            // Generate file extension, default to "jpg" if MIME type is not found
+            val fileExtension = mime.getExtensionFromMimeType(imageUri?.let { cr.getType(it) }) ?: "jpg"
+            val filename = "${binding.ETname.text.toString().trim()}.$fileExtension"  // Filename only, e.g., "hffy.jpg"
 
-            FirebaseApiManager.uploadFile(imageUri!!,
+            // Log the upload details for debugging
+            Log.d("FirebaseStorage", "Uploading to path: ${FirebaseApiManager.BaseUrl.FOOD}")
+            Log.d("FirebaseStorage", "Image URI: $imageUri")
+            Log.d("FirebaseStorage", "Generated Filename: $filename")
+
+            // Upload image to Firebase Storage under "Food" folder only
+            return FirebaseApiManager.uploadFile(
+                imageUri!!,
                 filename,
-                FirebaseApiManager.BaseUrl.FOOD + "/" + binding.ETname.text.toString().trim()).let {
-
-                return it
-            }
-
-
-
-
-        } else
-            return CustomeResult(false,"Please Select image")
-
-
+                FirebaseApiManager.BaseUrl.FOOD  // Upload to "Food" folder only
+            )
+        } else {
+            Log.e("FirebaseStorage", "Image URI is null; please select an image.")
+            return CustomeResult(false, "Please select an image") // Return error if no image selected
+        }
     }
 
+
+    // Function to open an intent for image selection
     private fun chooseImage() {
         val intent = Intent()
         intent.type = "image/*"
@@ -753,39 +809,31 @@ class AddFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickLi
         startActivityForResult(intent, CHOOSE_IMAGE)
     }
 
-    private fun getSelectedChip() : List<String>{
-
-        var timeList = mutableListOf<String>()
-
-        if(binding.CHMorning.isChecked)
-            timeList.add("Morning")
-
-        if(binding.CHAfternoon.isChecked)
-            timeList.add("Afternoon")
-
-        if(binding.CHEvening.isChecked)
-            timeList.add("Evening")
-
+    // Function to retrieve selected availability times from chips
+    private fun getSelectedChip(): List<String> {
+        val timeList = mutableListOf<String>()
+        if (binding.CHMorning.isChecked) timeList.add("Morning")
+        if (binding.CHAfternoon.isChecked) timeList.add("Afternoon")
+        if (binding.CHEvening.isChecked) timeList.add("Evening")
         return timeList
     }
 
+    // Override back button with custom transition animation
     override fun onBackPressed() {
         super.onBackPressed()
-        overridePendingTransition(
-            R.anim.slide_in_top,
-            R.anim.slide_out_bottom
-        )
+        overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom)
     }
 
-    override fun onLongClick(v: View?): Boolean {
-        return true
-    }
+    // Long-click listener (no specific action required, returns true to indicate handled)
+    override fun onLongClick(v: View?): Boolean = true
 
+    // Handle result from image chooser
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CHOOSE_IMAGE && resultCode == RESULT_OK && data != null && data.data != null) {
+        if (requestCode == CHOOSE_IMAGE && resultCode == RESULT_OK && data?.data != null) {
             imageUri = data.data
 
+            // Load selected image into ImageView using Glide
             Glide.with(this)
                 .load(imageUri)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -796,12 +844,10 @@ class AddFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickLi
         }
     }
 
-
+    // Companion object to hold constants for result codes
     companion object {
-        const val CHOOSE_IMAGE = 2001
+        const val CHOOSE_IMAGE = 2001 // Request code for image selection intent
     }
-
-
 }
 
 
@@ -835,45 +881,47 @@ import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiMana
 import com.canteenmanagment.canteen_managment_library.models.Food
 import kotlinx.coroutines.launch
 
+// Activity to edit existing food items, including updating details and handling deletion
 class EditFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickListener {
 
-    private lateinit var binding: ActivityEditFoodBinding
+    private lateinit var binding: ActivityEditFoodBinding // Binding for safe access to views
     private val mContext: Context = this
-    private val progressDialog: CustomProgressBar = CustomProgressBar(this)
-    private val deleteDialog: DeleteCustomDialog = DeleteCustomDialog(this)
-    private var imageUri: Uri? = null
-    private lateinit var food: Food
+    private val progressDialog: CustomProgressBar = CustomProgressBar(this) // Dialog to indicate progress
+    private val deleteDialog: DeleteCustomDialog = DeleteCustomDialog(this) // Dialog to confirm deletion
+    private var imageUri: Uri? = null // URI for the selected image
+    private lateinit var food: Food // Food item to be edited
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(
-            this,
-            R.layout.activity_edit_food
-        )
+        // Set up view binding with the layout
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_edit_food)
         setContentView(binding.root)
 
+        // Retrieve food item from intent
         food = intent.getSerializableExtra(FOOD_ITEM) as Food
 
+        // Set click listener for back button and update title text
         binding.IMback.setOnClickListener(this)
         binding.TVtitle.text = "Update Item"
 
-        binding.ETname.setText(food.name.toString())
+        // Pre-fill text fields and spinner based on the existing food data
+        binding.ETname.setText(food.name)
         binding.ETPrice.setText(food.price.toString())
 
+        // Set up spinner with custom adapter and pre-select the stored counter number
         binding.SPCounterNumber.adapter = CustomeSpinnerAdapter(this, listOf(1, 2, 3, 4, 5))
         food.counterNumber?.let {
-            binding.SPCounterNumber.setSelection(it-1,true)
+            binding.SPCounterNumber.setSelection(it - 1, true)
         }
-        if(food.availableTimes?.contains("Morning") == true)
-            binding.CHMorning.isChecked = true
-        if(food.availableTimes?.contains("Afternoon") == true)
-            binding.CHAfternoon.isChecked = true
-        if(food.availableTimes?.contains("Evening") == true)
-            binding.CHEvening.isChecked = true
 
+        // Set checkboxes based on availability times in food data
+        if (food.availableTimes?.contains("Morning") == true) binding.CHMorning.isChecked = true
+        if (food.availableTimes?.contains("Afternoon") == true) binding.CHAfternoon.isChecked = true
+        if (food.availableTimes?.contains("Evening") == true) binding.CHEvening.isChecked = true
 
+        // Load food image using Glide
         Glide.with(this)
             .load(food.imageurl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -882,55 +930,42 @@ class EditFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickL
             .error(R.drawable.error_image)
             .into(binding.IMFoodImage)
 
+        // Set up listeners for update, delete, and image selection
         binding.BTUpdate.setOnClickListener(this)
         binding.BTDeleteFood.setOnClickListener(this)
-
         binding.IMFoodImage.setOnClickListener(this)
         binding.IMFoodImage.setOnLongClickListener(this)
     }
 
-    private fun getSelectedChip() : List<String>{
-
-        var timeList = mutableListOf<String>()
-
-        if(binding.CHMorning.isChecked)
-            timeList.add("Morning")
-
-        if(binding.CHAfternoon.isChecked)
-            timeList.add("Afternoon")
-
-        if(binding.CHEvening.isChecked)
-            timeList.add("Evening")
-
+    // Function to get a list of selected availability times based on checked chips
+    private fun getSelectedChip(): List<String> {
+        val timeList = mutableListOf<String>()
+        if (binding.CHMorning.isChecked) timeList.add("Morning")
+        if (binding.CHAfternoon.isChecked) timeList.add("Afternoon")
+        if (binding.CHEvening.isChecked) timeList.add("Evening")
         return timeList
     }
 
+    // Handle click events for various actions
     override fun onClick(v: View?) {
-
         when (v?.id) {
-            R.id.IMback -> {
-                super.onBackPressed()
-            }
-            R.id.BT_update -> updateFood()
-
-            R.id.IM_Food_Image -> chooseImage()
-
-            R.id.BT_Delete_food -> deleteDialog.startDialog{
-                deleteFood()
-            }
-
+            R.id.IMback -> super.onBackPressed() // Navigate back on back button click
+            R.id.BT_update -> updateFood() // Trigger food update
+            R.id.IM_Food_Image -> chooseImage() // Open image chooser
+            R.id.BT_Delete_food -> deleteDialog.startDialog { deleteFood() } // Show delete dialog on delete button click
         }
     }
 
-    override fun onLongClick(v: View?): Boolean {
-        return true
-    }
+    // Long-click listener (no specific action required, returns true to indicate handled)
+    override fun onLongClick(v: View?): Boolean = true
 
+    // Handle image selection result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CHOOSE_IMAGE && resultCode == RESULT_OK && data != null && data.data != null) {
+        if (requestCode == CHOOSE_IMAGE && resultCode == RESULT_OK && data?.data != null) {
             imageUri = data.data
 
+            // Load selected image into ImageView using Glide
             Glide.with(this)
                 .load(imageUri)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -941,96 +976,99 @@ class EditFoodActivity : BaseActivity(), View.OnClickListener, View.OnLongClickL
         }
     }
 
+    // Function to handle updating food data
     private fun updateFood() {
+        progressDialog.startDialog() // Show progress dialog during update
 
-        progressDialog.startDialog()
         scope.launch {
-            uploadImage().let {
+            // Upload image if selected and get the URL
+            uploadImage().let { uploadResult ->
+                progressDialog.stopDiaolog() // Stop progress dialog after upload
 
-                progressDialog.stopDiaolog()
-
-                if (it.isSuccess || it.message.equals("Please Select image")){
-
+                if (uploadResult.isSuccess || uploadResult.message == "Please Select image") {
+                    // Update food item with entered data
                     food.name = binding.ETname.text.toString().trim()
                     food.price = binding.ETPrice.text.toString().trim().toInt()
                     food.counterNumber = binding.SPCounterNumber.selectedItemPosition + 1
-
                     food.availableTimes = getSelectedChip()
 
-                    if(it.data != null)
-                        food.imageurl = it.data.toString()
+                    // If image was uploaded, update image URL
+                    if (uploadResult.data != null) food.imageurl = uploadResult.data.toString()
 
-                    progressDialog.startDialog()
+                    progressDialog.startDialog() // Show progress dialog during database update
 
                     scope.launch {
+                        // Store updated food data in Firebase and show feedback
+                        FirebaseApiManager.updateFoodData(food).let { updateResult ->
+                            progressDialog.stopDiaolog() // Stop progress dialog
 
-                        FirebaseApiManager.updateFoodData(food).let {
-                            progressDialog.stopDiaolog()
-                            when (it.isSuccess) {
+                            when (updateResult.isSuccess) {
                                 true -> {
-                                    showShortToast(it.message, mContext)
-                                    setResult(FoodListActivity.DATA_CHANGE)
-                                    super.onBackPressed()
+                                    showShortToast(updateResult.message, mContext) // Show success message
+                                    setResult(FoodListActivity.DATA_CHANGE) // Set result to indicate data change
+                                    super.onBackPressed() // Return to previous screen
                                 }
-
-                                false -> showShortToast(it.message, mContext)
+                                false -> showShortToast(updateResult.message, mContext) // Show error message
                             }
                         }
                     }
-
+                } else {
+                    // Show error message if image upload failed
+                    showShortToast(uploadResult.message, mContext)
                 }
-
-                else
-                    showShortToast(it.message,mContext)
             }
         }
     }
 
-    private suspend fun uploadImage() : CustomeResult {
+    // Function to upload the selected image to Firebase
+    private suspend fun uploadImage(): CustomeResult {
         if (imageUri != null) {
-
             val cr = contentResolver
-            val mine = MimeTypeMap.getSingleton()
+            val mime = MimeTypeMap.getSingleton()
 
-            var filename = binding.ETname.text.toString()
-                .trim() + "." + mine.getExtensionFromMimeType(imageUri?.let { cr.getType(it) })
+            // Generate unique filename using food name and MIME type
+            val filename = "${binding.ETname.text.toString().trim()}.${mime.getExtensionFromMimeType(imageUri?.let { cr.getType(it) })}"
 
-            FirebaseApiManager.uploadFile(imageUri!!,
+            // Upload image to Firebase and return result
+            return FirebaseApiManager.uploadFile(
+                imageUri!!,
                 filename,
-                FirebaseApiManager.BaseUrl.FOOD + "/" + binding.ETname.text.toString().trim()).let {
-
-                return it
-            }
-
-        } else
-            return CustomeResult(false,"Please Select image")
-
+                FirebaseApiManager.BaseUrl.FOOD + "/" + binding.ETname.text.toString().trim()
+            )
+        } else {
+            return CustomeResult(false, "Please Select image") // Return error if no image selected
+        }
     }
 
-    private fun deleteFood(){
+    // Function to delete food item from database
+    private fun deleteFood() {
         scope.launch {
-            FirebaseApiManager.deleteFoodData(food).let {
-                deleteDialog.stopDialog()
-                when (it.isSuccess) {
-                    true -> {
-                        showShortToast(it.message, mContext)
-                        setResult(FoodListActivity.DATA_CHANGE)
-                        super.onBackPressed()
-                    }
+            // Delete food data from Firebase and show feedback
+            FirebaseApiManager.deleteFoodData(food).let { deleteResult ->
+                deleteDialog.stopDialog() // Stop delete dialog
 
-                    false -> showShortToast(it.message, mContext)
+                when (deleteResult.isSuccess) {
+                    true -> {
+                        showShortToast(deleteResult.message, mContext) // Show success message
+                        setResult(FoodListActivity.DATA_CHANGE) // Set result to indicate data change
+                        super.onBackPressed() // Return to previous screen
+                    }
+                    false -> showShortToast(deleteResult.message, mContext) // Show error message
                 }
             }
         }
     }
 
+    // Function to open intent for image selection
     private fun chooseImage() {
-        val intent = Intent()
-        intent.type = "image/*"
-        intent.action = Intent.ACTION_GET_CONTENT
+        val intent = Intent().apply {
+            type = "image/*"
+            action = Intent.ACTION_GET_CONTENT
+        }
         startActivityForResult(intent, CHOOSE_IMAGE)
     }
 
+    // Companion object to hold constants for request codes
     companion object {
         const val CHOOSE_IMAGE = 2001
     }
@@ -1055,126 +1093,121 @@ import com.canteenManagment.admin.helper.CustomProgressBar
 import com.canteenManagment.admin.helper.showShortToast
 import com.canteenManagment.admin.ui.FoodDetail.addFood.AddFoodActivity
 import com.canteenManagment.admin.ui.FoodDetail.editFood.EditFoodActivity
-import com.canteenManagment.admin.ui.Fragments.MenuFragment.Companion.CATEGORY_NAME
+import com.canteenManagment.admin.ui.Fragments.Menu.MenuFragment.Companion.CATEGORY_NAME
 import com.canteenmanagment.canteen_managment_library.apiManager.FirebaseApiManager
 import com.canteenmanagment.canteen_managment_library.models.Food
 import kotlinx.coroutines.launch
 
+// Activity to display a list of food items within a selected category and handle actions like editing and adding food items
 class FoodListActivity : BaseActivity(), View.OnClickListener {
 
+    // Binding to access layout views safely
     lateinit var binding: ActivityFoodListBinding
     private val mContext: Context = this
-    private lateinit var foodList: List<Food>
-    private val progressDialog: CustomProgressBar = CustomProgressBar(this)
-
+    private lateinit var foodList: List<Food> // List to hold food items for the selected category
+    private val progressDialog: CustomProgressBar = CustomProgressBar(this) // Progress dialog for loading indication
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_food_list)
 
-        binding = DataBindingUtil.setContentView(this,
-            R.layout.activity_food_list
-        )
+        // Initialize view binding
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_food_list)
+        // Set the title to the category name passed in the intent
         binding.title = intent.getStringExtra(CATEGORY_NAME)
 
+        // Set up click listeners for the back button and add button
         binding.IMback.setOnClickListener(this)
-
         binding.FABadd.setOnClickListener(this)
 
+        // Load data to display food items in the RecyclerView
         loadData()
 
-        //binding.SRRefreshLayout.setRefreshStyle(PullRefreshLayout.STYLE_RING)
+        // Set up pull-to-refresh behavior to reload food items
         binding.SRRefreshLayout.setOnRefreshListener {
             loadData()
         }
-
-
     }
 
+    // Function to load food items for the selected category from Firebase and display in the RecyclerView
     private fun loadData() {
         scope.launch {
+            // Fetch all food items for the selected category
             FirebaseApiManager.getAllFoodFromCategory(intent.getStringExtra(CATEGORY_NAME)!!).let {
-                binding.SRRefreshLayout.isRefreshing = false
-                foodList = it
-                binding.RVFoodList.visibility = View.VISIBLE
+                binding.SRRefreshLayout.isRefreshing = false // Stop refreshing indicator
+                foodList = it // Assign fetched data to foodList
+                binding.RVFoodList.visibility = View.VISIBLE // Make RecyclerView visible
+
+                // Set up the RecyclerView adapter with the fetched food data and click listeners
                 binding.RVFoodList.adapter = FoodListRecyclerViewAdapter(it,
                     FoodListRecyclerViewAdapter.ClickListener(
+                        // Navigate to EditFoodActivity to edit selected food item
                         { position ->
-                            val i = Intent(mContext, EditFoodActivity::class.java)
-                            i.putExtra(FOOD_ITEM, foodList.get(position))
-                            startActivityForResult(i, DATA_CHANGE)
+                            val intent = Intent(mContext, EditFoodActivity::class.java)
+                            intent.putExtra(FOOD_ITEM, foodList[position])
+                            startActivityForResult(intent, DATA_CHANGE)
                         },
-                        { position,status ->
-                            var food = foodList.get(position)
+                        // Change availability status of a food item
+                        { position, status ->
+                            val food = foodList[position]
                             food.available = status
-                            updateFood(food)
+                            updateFood(food) // Update food availability in Firebase
                         })
                 )
             }
         }
     }
 
+    // Function to update a food item's availability in Firebase
     private fun updateFood(food: Food) {
-
-        progressDialog.startDialog()
+        progressDialog.startDialog() // Show loading dialog
 
         scope.launch {
-
+            // Update food item in Firebase
             FirebaseApiManager.updateFoodData(food).let {
-                progressDialog.stopDiaolog()
-                when (it.isSuccess) {
-                    true -> {
-                        //showShortToast(it.message, mContext)
-                    }
-
-                    false -> showShortToast(it.message, mContext)
+                progressDialog.stopDiaolog() // Hide loading dialog
+                if (!it.isSuccess) {
+                    showShortToast(it.message, mContext) // Show error if update fails
                 }
             }
-
         }
-
-
     }
 
+    // Handle click events for back button and add button
     override fun onClick(v: View?) {
-
         when (v?.id) {
-
-            R.id.IMback -> onBackPressed()
-
-            R.id.FABadd -> {
-                var i = Intent(this, AddFoodActivity::class.java)
-                i.putExtra(CATEGORY_NAME, intent.getStringExtra(CATEGORY_NAME))
-                startActivityForResult(i, DATA_CHANGE)
+            R.id.IMback -> onBackPressed() // Handle back button click
+            R.id.FABadd -> { // Handle add button click to add a new food item
+                val intent = Intent(this, AddFoodActivity::class.java)
+                intent.putExtra(CATEGORY_NAME, intent.getStringExtra(CATEGORY_NAME))
+                startActivityForResult(intent, DATA_CHANGE)
                 overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_top)
             }
         }
     }
 
+    // Override back button to handle custom visibility changes
     override fun onBackPressed() {
         binding.CL.visibility = View.INVISIBLE
         super.onBackPressed()
-
     }
 
+    // Handle result from activities like AddFoodActivity or EditFoodActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == DATA_CHANGE) {
-            binding.RVFoodList.visibility = View.GONE
-            loadData()
+            binding.RVFoodList.visibility = View.GONE // Hide RecyclerView during refresh
+            loadData() // Reload data after changes
         }
     }
 
+    // Companion object to hold constants for data keys
     companion object {
-        const val FOOD_ITEM = "Food Item"
-        const val DATA_CHANGE = 2002
-
+        const val FOOD_ITEM = "Food Item" // Key for passing food item data
+        const val DATA_CHANGE = 2002 // Request code for data changes
     }
-
-
 }
+
 ========================================
 
 File: app/src/main/java/com/canteenManagment/admin/ui/FoodDetail/listFood/FoodListRecyclerViewAdapter.kt
@@ -1190,32 +1223,35 @@ import com.canteenManagment.admin.R
 import com.canteenManagment.admin.databinding.ItemFoodListLayoutBinding
 import com.canteenmanagment.canteen_managment_library.models.Food
 
+// RecyclerView adapter to display a list of food items with options to view or change availability status
 class FoodListRecyclerViewAdapter(
-    private val foodList: List<Food>,
-    private val listener: ClickListener
+    private val foodList: List<Food>, // List of food items to display
+    private val listener: ClickListener // Listener for handling item click events
 ) : RecyclerView.Adapter<FoodListRecyclerViewAdapter.ViewHolder>() {
 
+    // Inflate item layout and create ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = ItemFoodListLayoutBinding.inflate(layoutInflater, parent, false)
         return ViewHolder(binding)
     }
 
+    // Bind data for each food item to its corresponding views in the ViewHolder
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val food = foodList[position]
+        val food = foodList[position] // Get the food item at the current position
 
-        // Set up UI elements
+        // Bind food item data to UI elements
         holder.binding.apply {
-            TVTitle.text = food.name
-            TVPrice.text = "${food.price} Rs."
+            TVTitle.text = food.name // Set the food name
+            TVPrice.text = "${food.price} Rs." // Set the food price with currency
 
-            // Set availability
+            // Set the availability toggle
             TBAvailable.isChecked = food.available
 
-            // Set on click listeners
+            // Set up click listeners for item and availability toggle
             root.setOnClickListener { listener.openActivity(position) }
             TBAvailable.setOnClickListener {
-                listener.changeFoodStatus(position, TBAvailable.isChecked)
+                listener.changeFoodStatus(position, TBAvailable.isChecked) // Update food availability
             }
 
             // Load food image using Glide with caching and error handling
@@ -1229,15 +1265,16 @@ class FoodListRecyclerViewAdapter(
         }
     }
 
+    // Return the total count of items in the food list
     override fun getItemCount(): Int = foodList.size
 
-    // ViewHolder class with binding
+    // ViewHolder class that holds references to the views in each item layout
     class ViewHolder(val binding: ItemFoodListLayoutBinding) : RecyclerView.ViewHolder(binding.root)
 
-    // Listener class with lambdas for item clicks and food status updates
+    // Listener class with lambdas for item click and food status change actions
     class ClickListener(
-        val openActivity: (Int) -> Unit,
-        val changeFoodStatus: (Int, Boolean) -> Unit
+        val openActivity: (Int) -> Unit, // Lambda to open activity for editing the selected food item
+        val changeFoodStatus: (Int, Boolean) -> Unit // Lambda to change food availability status
     )
 }
 
@@ -1308,7 +1345,7 @@ class CustomProgressBar(val activity : Activity) {
 }
 ========================================
 
-File: app/src/main/java/com/canteenManagment/admin/helper/DeleteCustomDiolog.kt
+File: app/src/main/java/com/canteenManagment/admin/helper/DeleteCustomDialog.kt
 ----------------------------------------
 package com.canteenManagment.admin.helper
 
@@ -1316,7 +1353,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.view.LayoutInflater
-import com.canteenManagment.admin.R
 import com.canteenManagment.admin.databinding.DeleteCustomeDiologBinding // Ensure the generated binding import is correct
 
 class DeleteCustomDialog(private val activity: Activity) {
@@ -2614,7 +2650,7 @@ File: app/src/main/res/layout/fragment_profile.xml
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.Fragments.ProfileFragment"
+    tools:context=".ui.Fragments.Profile.ProfileFragment"
     style="@style/fragment_style">
 
     <TextView
@@ -2790,7 +2826,7 @@ File: app/src/main/res/layout/fragment_home.xml
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/IM_scan"
+        android:id="@+id/Scan_Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/medium"
@@ -2800,7 +2836,7 @@ File: app/src/main/res/layout/fragment_home.xml
         app:layout_constraintTop_toTopOf="@+id/textView4" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/RV_prepare_food_list"
+        android:id="@+id/Order_RecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/item_preparing_food_list_layout"
@@ -3299,46 +3335,46 @@ File: app/src/debug/google-services.json
 ----------------------------------------
 {
   "project_info": {
-    "project_number": "375112624309",
-    "firebase_url": "https://canteen-management-b428e.firebaseio.com",
-    "project_id": "canteen-management-b428e",
-    "storage_bucket": "canteen-management-b428e.appspot.com"
+    "project_number": "761337411544",
+    "project_id": "canteen-management-8272d",
+    "storage_bucket": "canteen-management-8272d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:375112624309:android:c2770501c69c8c4f4476fc",
+        "mobilesdk_app_id": "1:761337411544:android:2ef01721936cba1e9564ad",
         "android_client_info": {
           "package_name": "com.canteenManagment.admin"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "375112624309-auo4ig7kf6kufmcoin6h8fmdqse9pgrc.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.canteenManagment.admin",
-            "certificate_hash": "97451227441e39de90fd33593794ce0a8d133531"
-          }
-        },
-        {
-          "client_id": "375112624309-ragt9207a3uasfc34ds8n88ar19gmr7e.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDalEq1ahLMTLjjAWM7q2ujMUmVDOwzjxw"
+          "current_key": "AIzaSyDbRPsV2Xr0dcyJ2ukiI69rYYrKdczjiFw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "375112624309-ragt9207a3uasfc34ds8n88ar19gmr7e.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:761337411544:android:56868278d46ce09a9564ad",
+        "android_client_info": {
+          "package_name": "com.canteenmanagment"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbRPsV2Xr0dcyJ2ukiI69rYYrKdczjiFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
         }
       }
     }
@@ -3620,6 +3656,7 @@ File: canteen_managment_library/src/main/java/com/canteenmanagment/canteen_manag
 package com.canteenmanagment.canteen_managment_library.apiManager
 
 import android.net.Uri
+import android.util.Log
 import com.canteenmanagment.canteen_managment_library.models.CartFood
 import com.canteenmanagment.canteen_managment_library.models.Food
 import com.canteenmanagment.canteen_managment_library.models.Order
@@ -3707,64 +3744,76 @@ object FirebaseApiManager {
     suspend fun getAllFoodFromCategory(category: String): List<Food> {
         val foodDR = DB.collection(BaseUrl.FOOD)
 
-        var result: CustomeResult = CustomeResult()
+        val result = CustomeResult()
 
-        var snapshot = foodDR.whereEqualTo(Food.CATEGORY, category).get().addOnSuccessListener {
-            result.isSuccess = true
-        }.addOnFailureListener {
-            result.isSuccess = false
-            result.message = it.message.toString()
-        }.await()
+        Log.d("CategoryQuery", "Querying foods with category: $category") // Log the category parameter
 
-        var b = snapshot.documents.map {
-            Food.getFoodFromDocumentSnapShot(it.data!!)
-        }
-
-        return b
-
-    }
-
-    suspend fun uploadFile(
-            fileURI: Uri,
-            fileName: String,
-            uploadPath: String
-    ): CustomeResult {
-        var result: CustomeResult = CustomeResult()
-        return withContext(Dispatchers.IO) {
-            try {
-
-                var downloadUrl: String? = null
-
-                val reference: StorageReference? =
-                        FirebaseStorage.getInstance().getReference(uploadPath)
-
-                val mref = reference!!.child(fileName)
-
-                mref.putFile(fileURI).await()
-
-                mref.downloadUrl.addOnCompleteListener { task ->
-                    downloadUrl = task.result.toString()
-                }.addOnFailureListener {
-                    result.message = it.message.toString()
-                }.await()
-
-                if (downloadUrl != null) {
-                    result.isSuccess = true
-                    result.data = downloadUrl
-                    result
-                } else {
-                    result.isSuccess = false
-                    result
-                }
-
-            } catch (e: Exception) {
+        // Execute Firestore query to fetch documents where the category matches
+        val snapshot = foodDR.whereEqualTo(Food.CATEGORY, category)
+            .get()
+            .addOnSuccessListener { documents ->
+                result.isSuccess = true
+                Log.d("FirestoreSnapshot", "Documents found: ${documents.size()}") // Log the number of documents
+            }
+            .addOnFailureListener { exception ->
                 result.isSuccess = false
-                result.message = e.message.toString()
-                result
+                result.message = exception.message.toString()
+                Log.e("FirestoreError", "Error fetching foods: ${exception.message}") // Log any error
+            }
+            .await()
+
+        // Map Firestore documents to Food objects
+        val foodList = snapshot.documents.mapNotNull {
+            try {
+                Food.getFoodFromDocumentSnapShot(it.data!!)
+            } catch (e: Exception) {
+                Log.e("DataMappingError", "Error mapping document to Food object: ${e.message}")
+                null // Skip documents that cause mapping issues
             }
         }
 
+        // Log the fetched food items for debugging
+        Log.d("FoodList", "Fetched food items: $foodList")
+
+        return foodList
     }
+
+
+    suspend fun uploadFile(
+        fileURI: Uri,
+        fileName: String,
+        uploadPath: String
+    ): CustomeResult {
+        val result = CustomeResult()
+        return withContext(Dispatchers.IO) {
+            try {
+                // Ensure the Storage reference is correct
+                val reference = FirebaseStorage.getInstance().getReference(uploadPath).child(fileName)
+
+                Log.d("FirebaseStorage", "Starting upload to path: $uploadPath/$fileName with URI: $fileURI")
+
+                // Upload the file to Firebase Storage
+                reference.putFile(fileURI).await()
+
+                // Retrieve the download URL after upload completes
+                val downloadUrl = reference.downloadUrl.await()
+                Log.d("FirebaseStorage", "File uploaded successfully. Download URL: $downloadUrl")
+
+                // Populate result with success data
+                result.isSuccess = true
+                result.data = downloadUrl.toString()
+                result
+
+            } catch (e: Exception) {
+                // Log the exception and set the failure message
+                Log.e("FirebaseStorage", "File upload failed: ${e.message}")
+                result.isSuccess = false
+                result.message = e.message ?: "Unknown error during upload"
+                result
+            }
+        }
+    }
+
 
     suspend fun placeOrderInSystem(
             foodList: MutableList<CartFood>,
