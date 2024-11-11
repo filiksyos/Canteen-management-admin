@@ -30,9 +30,9 @@ class MenuFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
         // Bind category names to layout views for display
         binding.snacks = Food.Category.SNACKS.value
-        binding.fixThali = Food.Category.FIX_THALI.value
+        binding.animal = Food.Category.ANIMAL.value
         binding.drinks = Food.Category.DRINKS.value
-        binding.punjabiMeal = Food.Category.PUNJABI_MEAL.value
+        binding.vegan = Food.Category.VEGAN.value
 
         // Set up click listeners for each category card
         binding.CL1.setOnClickListener(this)
@@ -57,11 +57,12 @@ class MenuFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         // Determine the category selected and set up transition animation
         when (v?.id) {
             R.id.CL1 -> {
+                // Once, I create a new database, "Snacks" should be replaced with Food.Category.FIX_THALI.value
                 intent.putExtra(CATEGORY_NAME, Food.Category.SNACKS.value)
                 options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL1, "open_transition")
             }
             R.id.CL2 -> {
-                intent.putExtra(CATEGORY_NAME, Food.Category.FIX_THALI.value)
+                intent.putExtra(CATEGORY_NAME, Food.Category.ANIMAL.value)
                 options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL2, "open_transition")
             }
             R.id.CL3 -> {
@@ -69,7 +70,7 @@ class MenuFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL3, "open_transition")
             }
             R.id.CL4 -> {
-                intent.putExtra(CATEGORY_NAME, Food.Category.PUNJABI_MEAL.value)
+                intent.putExtra(CATEGORY_NAME, Food.Category.VEGAN.value)
                 options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity as Activity, binding.CL4, "open_transition")
             }
         }
