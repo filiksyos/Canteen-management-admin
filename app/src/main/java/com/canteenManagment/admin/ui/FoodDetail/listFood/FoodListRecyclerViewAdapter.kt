@@ -29,7 +29,7 @@ class FoodListRecyclerViewAdapter(
         // Bind food item data to UI elements
         holder.binding.apply {
             TVTitle.text = food.name // Set the food name
-            TVPrice.text = "${food.price} Rs." // Set the food price with currency
+            TVPrice.text = "${food.price} Birr." // Set the food price with currency
 
             // Set the availability toggle
             TBAvailable.isChecked = food.available
